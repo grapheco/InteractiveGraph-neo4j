@@ -1,0 +1,10 @@
+{
+  "product": {
+    "name": "graphviz-browser",
+    "version": "0.0.1"
+  },
+  "canvaWidth": 3000,
+  "canvaHeight": 2000,
+  "gridSize": 100,
+  "numberOfNodes": 500
+}
