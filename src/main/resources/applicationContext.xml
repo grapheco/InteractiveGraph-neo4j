@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="neo4jConnector" class="org.graphviz.server.commands.Neo4jConnector">
+    <context:annotation-config/>
+    <context:component-scan base-package="org.graphviz.server"/>
+
+    <bean class="org.graphviz.server.commands.Neo4jConnector">
         <property name="boltUrl" value="bolt://localhost:7687"/>
         <property name="boltUser" value="neo4j"/>
         <property name="boltPassword" value="neoneo"/>
     </bean>
 
-    <bean id="commandRegistry" class="org.graphviz.server.commands.DefaultCommandRegistry">
+    <bean class="org.graphviz.server.commands.Neo4jGraphMetaDBInMemory">
+        <property name="idName" value="id"/>
+        <property name="captionName" value="name"/>
+        <property name="titleName" value="name"/>
+    </bean>
+
+    <bean class="org.graphviz.server.commands.DefaultCommandRegistry">
         <property name="commandsMap">
             <map>
                 <entry key="init">
@@ -23,11 +33,7 @@
                         <property name="source" value="./WEB-INF/cmd_loadAll.json"/>
                     </bean>
                     -->
-                    <bean class="org.graphviz.server.commands.LoadGraphFromNeo4jServer">
-                        <property name="connector">
-                            <ref bean="neo4jConnector"/>
-                        </property>
-                    </bean>
+                    <bean class="org.graphviz.server.commands.LoadGraphFromNeo4jServer"/>
                 </entry>
             </map>
         </property>

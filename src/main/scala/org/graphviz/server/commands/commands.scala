@@ -5,6 +5,7 @@ import java.io.{File, FileInputStream, OutputStream}
 import org.apache.commons.io.IOUtils
 import org.graphviz.server._
 import org.neo4j.driver.v1.Session
+import org.springframework.beans.factory.annotation.Autowired
 
 import scala.collection.JavaConversions._
 
@@ -15,20 +16,22 @@ class LazyCommandFromFile extends Command {
     _source = file;
   }
 
-  override def execute(params: Params, ct:ContentTag, out: OutputStream) = {
+  override def execute(params: Params, ct: ContentTag, out: OutputStream) = {
     IOUtils.copy(new FileInputStream(_source), out);
   }
 }
 
-trait WithNeo4jServer{
-  var _connector: Neo4jConnector = null;
-
-  def setConnector(value: Neo4jConnector) = _connector = value;
+trait WithNeo4jServer {
+  @Autowired
+  var _neo4jConnector: Neo4jConnector = null;
 }
 
-class LoadGraphFromNeo4jServer extends CommandWithMapAsOutput with WithNeo4jServer{
+class LoadGraphFromNeo4jServer extends CommandWithMapAsOutput with WithNeo4jServer {
+  @Autowired
+  var _graphMetaDB: GraphMetaDB = null;
+
   override def execute(params: Params): Map[String, Any] = {
-    _connector.execute { (session: Session) =>
+    _neo4jConnector.execute { (session: Session) =>
       val nodes = queryNodes(session);
       val edges = queryEdges(session);
       Map[String, Any]("data" -> Map[String, Any]("nodes" -> nodes, "edges" -> edges));
@@ -54,7 +57,13 @@ class LoadGraphFromNeo4jServer extends CommandWithMapAsOutput with WithNeo4jServ
       val map = node.asMap();
 
       val labels = node.labels().toArray;
-      map.toMap + ("id" -> id) + ("labels" -> labels);
+      var nodes = map.toMap + ("id" -> id) + ("labels" -> labels);
+      val meta = _graphMetaDB.getNodeMeta(node);
+      meta.getGroupName().foreach { x => nodes += ("group" -> x); }
+      meta.getCaption().foreach { x => nodes += ("label" -> x); }
+      meta.getSize().foreach { x => nodes += ("value" -> x); }
+
+      nodes
     }.toArray
   }
 }
