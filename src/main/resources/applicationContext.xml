@@ -14,9 +14,9 @@
     </bean>
 
     <bean class="org.graphviz.server.commands.Neo4jGraphMetaDBInMemory">
-        <property name="idName" value="id"/>
-        <property name="captionName" value="name"/>
-        <property name="titleName" value="name"/>
+        <property name="captionExpr" value="${prop.name}"/>
+        <property name="titleExpr" value="${prop.name}"/>
+        <property name="photoURLExpr" value="http://localhost:8088/photos/byname/${prop.name}.jpg"/>
     </bean>
 
     <bean class="org.graphviz.server.commands.DefaultCommandRegistry">
