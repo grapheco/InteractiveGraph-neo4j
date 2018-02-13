@@ -21,6 +21,7 @@ class Servlet extends HttpServlet {
 
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) = {
     val command = req.getParameter("command");
+    val jsoncallback = req.getParameter("jsoncallback");
 
     def sendError(msg: String): Unit = {
       resp.sendError(500, msg);
@@ -51,7 +52,14 @@ class Servlet extends HttpServlet {
           def setCharacterEncoding(en: String) = resp.setCharacterEncoding(en);
         };
 
+        //enable jsonp
+        if (jsoncallback != null)
+          out.print(jsoncallback + "(");
+
         _commandRegistry.from(command).execute(params, ct, out);
+        if (jsoncallback != null)
+          out.print(")");
+
         out.close();
       }
       catch {

@@ -11,16 +11,16 @@ import scala.collection.JavaConversions
   */
 object JsonUtils {
   val gson = new GsonBuilder().
-    registerTypeHierarchyAdapter(classOf[Map[_,_]], new ScalaMapSerializer()).
+    registerTypeHierarchyAdapter(classOf[Map[_, _]], new ScalaMapSerializer()).
     create();
 
-  class ScalaMapSerializer extends JsonSerializer[Map[_,_]] {
-    def serialize(src: Map[_,_], typeOfSrc: Type, context: JsonSerializationContext): JsonElement = {
+  class ScalaMapSerializer extends JsonSerializer[Map[_, _]] {
+    def serialize(src: Map[_, _], typeOfSrc: Type, context: JsonSerializationContext): JsonElement = {
       gson.toJsonTree(JavaConversions.mapAsJavaMap(src));
     }
   }
 
-   def map2JSON(map: Map[String, Any]): String = {
+  def map2JSON(map: Map[String, Any]): String = {
     gson.toJson(map);
   }
 }

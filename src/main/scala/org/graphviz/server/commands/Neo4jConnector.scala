@@ -1,5 +1,6 @@
 package org.graphviz.server.commands
 
+import org.graphviz.server.util.VelocityUtils
 import org.neo4j.driver.v1._
 import org.neo4j.driver.v1.types.Node
 import org.springframework.beans.factory.InitializingBean
@@ -15,8 +16,6 @@ trait GraphMetaDB {
 }
 
 trait NodeMeta {
-  def getId(): String;
-
   def getCaption(): Option[String];
 
   def getTitle(): Option[String];
@@ -28,23 +27,24 @@ trait NodeMeta {
   def getXY(): Option[(Double, Double)];
 
   def getColor(): Option[String];
+
+  def getPhotoURL(): Option[String];
 }
 
 class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
   @Autowired
   var _neo4jConnector: Neo4jConnector = null;
   var _nodesDegreeMap = collection.mutable.Map[String, Int]();
-
+  var _photoURLExpr: Option[String] = None;
   var _nodesCount: Option[Int] = None;
-  var _idName: String = "id";
-  var _captionName: Option[String] = None;
-  var _titleName: Option[String] = None;
+  var _captionExpr: Option[String] = None;
+  var _titleExpr: Option[String] = None;
 
-  def setIdName(value: String) = _idName = value;
+  def setCaptionExpr(value: String) = _captionExpr = Some(value);
 
-  def setCaptionName(value: String) = _captionName = Some(value);
+  def setTitleExpr(value: String) = _titleExpr = Some(value);
 
-  def setTitleName(value: String) = _titleName = Some(value);
+  def setPhotoURLExpr(value: String) = _photoURLExpr = Some(value);
 
   def updateMeta() = {
     //count numbers of nodes
@@ -61,21 +61,23 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
   override def getNodesCount(): Option[Int] = _nodesCount;
 
   override def getNodeMeta(node: Node): NodeMeta = {
-    val map = node.asMap();
+    val ctx = Map[String, Any]("node" -> node,
+      "prop" -> (node.asMap().toMap + ("_id" -> node.id())));
+
     new NodeMeta() {
-      def getId(): String = map(_idName).toString;
+      def getCaption(): Option[String] = _captionExpr.map(VelocityUtils.parse(_, ctx));
 
-      def getCaption(): Option[String] = _captionName.map(map.get(_).toString);
+      def getTitle(): Option[String] = _titleExpr.map(VelocityUtils.parse(_, ctx));
 
-      def getTitle(): Option[String] = _titleName.map(map.get(_).toString);
-
-      def getSize(): Option[Int] = _nodesDegreeMap.get(getId());
+      def getSize(): Option[Int] = _nodesDegreeMap.get(node.id().toString);
 
       def getGroupName(): Option[String] = node.labels().headOption;
 
       def getXY(): Option[(Double, Double)] = None;
 
       def getColor(): Option[String] = None;
+
+      def getPhotoURL(): Option[String] = _photoURLExpr.map(VelocityUtils.parse(_, ctx));
     };
   }
 }

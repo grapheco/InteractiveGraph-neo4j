@@ -19,7 +19,13 @@
             <artifactId>spring-web</artifactId>
             <version>4.0.0.RELEASE</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <!-- velocity -->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
+       <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

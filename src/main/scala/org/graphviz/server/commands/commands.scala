@@ -26,7 +26,7 @@ trait WithNeo4jServer {
   var _neo4jConnector: Neo4jConnector = null;
 }
 
-class LoadGraphFromNeo4jServer extends CommandWithMapAsOutput with WithNeo4jServer {
+class LoadGraphFromNeo4jServer extends JsonOutput with WithNeo4jServer {
   @Autowired
   var _graphMetaDB: GraphMetaDB = null;
 
@@ -62,6 +62,7 @@ class LoadGraphFromNeo4jServer extends CommandWithMapAsOutput with WithNeo4jServ
       meta.getGroupName().foreach { x => nodes += ("group" -> x); }
       meta.getCaption().foreach { x => nodes += ("label" -> x); }
       meta.getSize().foreach { x => nodes += ("value" -> x); }
+      meta.getPhotoURL().foreach { x => nodes += ("image" -> x); }
 
       nodes
     }.toArray

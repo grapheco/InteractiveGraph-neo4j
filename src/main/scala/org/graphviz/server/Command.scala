@@ -30,7 +30,7 @@ trait Command {
   def execute(params: Params, ct: ContentTag, out: OutputStream);
 }
 
-trait CommandWithMapAsOutput extends Command {
+trait JsonOutput extends Command {
   override final def execute(params: Params, ct: ContentTag, out: OutputStream): Unit = {
     ct.setCharacterEncoding("utf-8");
     ct.setContentType("text/json");
