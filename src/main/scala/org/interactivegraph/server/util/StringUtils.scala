@@ -1,4 +1,4 @@
-package org.graphviz.server.util
+package org.interactivegraph.server.util
 
 import java.util.regex.Pattern
 

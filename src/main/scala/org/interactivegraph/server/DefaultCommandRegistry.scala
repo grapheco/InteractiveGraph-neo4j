@@ -1,8 +1,6 @@
-package org.graphviz.server.commands
+package org.interactivegraph.server
 
 import java.util.{Map => JMap}
-
-import org.graphviz.server.{Command, CommandRegistry}
 
 import scala.collection.JavaConversions
 
