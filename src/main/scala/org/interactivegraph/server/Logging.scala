@@ -1,4 +1,4 @@
-package org.graphviz.server
+package org.interactivegraph.server
 
 import org.apache.log4j.Logger
 

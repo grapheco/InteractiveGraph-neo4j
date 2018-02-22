@@ -1,9 +1,9 @@
-package org.graphviz.server
+package org.interactivegraph.server
 
 import java.io.OutputStream
 import java.util.{Map => JMap}
 
-import org.graphviz.server.util.JsonUtils
+import org.interactivegraph.server.util.JsonUtils
 
 /**
   * Created by bluejoe on 2018/2/6.

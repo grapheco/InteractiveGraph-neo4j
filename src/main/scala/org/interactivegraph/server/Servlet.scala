@@ -1,4 +1,4 @@
-package org.graphviz.server
+package org.interactivegraph.server
 
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}

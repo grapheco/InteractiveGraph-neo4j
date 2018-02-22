@@ -2,7 +2,7 @@ import java.lang.reflect.Type
 import java.util.{Map => JMap}
 
 import com.google.gson.{GsonBuilder, JsonElement, JsonSerializationContext, JsonSerializer}
-import org.graphviz.server.util.JsonUtils
+import org.interactivegraph.server.util.JsonUtils
 
 import scala.collection.JavaConversions
 

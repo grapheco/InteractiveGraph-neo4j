@@ -5,7 +5,7 @@
          version="3.1">
     <servlet>
         <servlet-name>GraphVizServlet</servlet-name>
-        <servlet-class>org.graphviz.server.Servlet</servlet-class>
+        <servlet-class>org.interactivegraph.server.Servlet</servlet-class>
     </servlet>
 
     <!--loads spring beans-->

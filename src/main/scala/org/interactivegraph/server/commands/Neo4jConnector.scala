@@ -1,6 +1,6 @@
-package org.graphviz.server.commands
+package org.interactivegraph.server.commands
 
-import org.graphviz.server.util.VelocityUtils
+import org.interactivegraph.server.util.VelocityUtils
 import org.neo4j.driver.v1._
 import org.neo4j.driver.v1.types.Node
 import org.springframework.beans.factory.InitializingBean

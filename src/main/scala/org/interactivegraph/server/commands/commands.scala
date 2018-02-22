@@ -1,9 +1,9 @@
-package org.graphviz.server.commands
+package org.interactivegraph.server.commands
 
 import java.io.{File, FileInputStream, OutputStream}
 
 import org.apache.commons.io.IOUtils
-import org.graphviz.server._
+import org.interactivegraph.server.{Command, ContentTag, JsonOutput, Params}
 import org.neo4j.driver.v1.Session
 import org.springframework.beans.factory.annotation.Autowired
 
