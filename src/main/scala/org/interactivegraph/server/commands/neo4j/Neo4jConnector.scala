@@ -1,4 +1,4 @@
-package org.interactivegraph.server.commands
+package org.interactivegraph.server.commands.neo4j
 
 import org.interactivegraph.server.util.VelocityUtils
 import org.neo4j.driver.v1._
@@ -18,6 +18,8 @@ trait GraphMetaDB {
 trait NodeMeta {
   def getCaption(): Option[String];
 
+  def getInfo(): Option[String];
+
   def getTitle(): Option[String];
 
   def getSize(): Option[Int];
@@ -36,11 +38,15 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
   var _neo4jConnector: Neo4jConnector = null;
   var _nodesDegreeMap = collection.mutable.Map[String, Int]();
   var _photoURLExpr: Option[String] = None;
+  var _infoExpr: Option[String] = None;
+  var _localPhotoFilePathExpr: Option[String] = None;
   var _nodesCount: Option[Int] = None;
   var _captionExpr: Option[String] = None;
   var _titleExpr: Option[String] = None;
 
   def setCaptionExpr(value: String) = _captionExpr = Some(value);
+
+  def setInfoExpr(value: String) = _infoExpr = Some(value);
 
   def setTitleExpr(value: String) = _titleExpr = Some(value);
 
@@ -51,7 +57,7 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
     _nodesCount = Some(_neo4jConnector.querySingleObject("match (n) return count(n)", _.get(0).asInt()));
     //calculates relations of each node
     _nodesDegreeMap.clear();
-    _neo4jConnector.queryObjects("MATCH (c)-[]-() WITH c, count(*) AS degree return id(c),degree",
+    _neo4jConnector.queryObjects("MATCH (c)-[]-() WITH c, count(*) AS degree return id(c), degree",
       (node) => (node.get(0).toString() -> node.get(1).asInt())).foreach(x => _nodesDegreeMap.update(x._1, x._2));
   }
 
@@ -65,19 +71,21 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
       "prop" -> (node.asMap().toMap + ("_id" -> node.id())));
 
     new NodeMeta() {
-      def getCaption(): Option[String] = _captionExpr.map(VelocityUtils.parse(_, ctx));
+      override def getCaption(): Option[String] = _captionExpr.map(VelocityUtils.parse(_, ctx));
 
-      def getTitle(): Option[String] = _titleExpr.map(VelocityUtils.parse(_, ctx));
+      override def getTitle(): Option[String] = _titleExpr.map(VelocityUtils.parse(_, ctx));
 
-      def getSize(): Option[Int] = _nodesDegreeMap.get(node.id().toString);
+      override def getSize(): Option[Int] = _nodesDegreeMap.get(node.id().toString);
 
-      def getGroupName(): Option[String] = node.labels().headOption;
+      override def getGroupName(): Option[String] = node.labels().headOption;
 
-      def getXY(): Option[(Double, Double)] = None;
+      override def getXY(): Option[(Double, Double)] = None;
 
-      def getColor(): Option[String] = None;
+      override def getColor(): Option[String] = None;
 
-      def getPhotoURL(): Option[String] = _photoURLExpr.map(VelocityUtils.parse(_, ctx));
+      override def getPhotoURL(): Option[String] = _photoURLExpr.map(x => VelocityUtils.parse(x.trim(), ctx).trim);
+
+      override def getInfo(): Option[String] = _infoExpr.map(x => VelocityUtils.parse(x.trim(), ctx).trim);
     };
   }
 }
@@ -113,4 +121,9 @@ class Neo4jConnector {
       fnMap(session.run(queryString).next())
     });
   }
+}
+
+trait WithNeo4jServer {
+  @Autowired
+  var _neo4jConnector: Neo4jConnector = null;
 }

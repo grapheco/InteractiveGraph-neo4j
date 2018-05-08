@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<tools>
+    <toolbox scope="application">
+        <tool class="org.interactivegraph.server.FileSystemTool"/>
+    </toolbox>
+</tools>
