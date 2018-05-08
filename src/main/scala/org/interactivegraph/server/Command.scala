@@ -34,7 +34,7 @@ trait JsonOutput extends Command {
   override final def execute(params: Params, ct: ContentTag, out: OutputStream): Unit = {
     ct.setCharacterEncoding("utf-8");
     ct.setContentType("text/json");
-    out.write(JsonUtils.map2JSON(execute(params)).getBytes("utf-8"));
+    out.write(JsonUtils.toJSONString(execute(params)).getBytes("utf-8"));
   }
 
   def execute(params: Params): Map[String, Any];
@@ -42,8 +42,7 @@ trait JsonOutput extends Command {
 
 trait Params {
   def getInt(name: String): Int;
-
   def getString(name: String): String;
-
+  def getStringArray(name: String):Array[String];
   def contains(name: String): Boolean;
 }

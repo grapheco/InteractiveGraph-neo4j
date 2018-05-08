@@ -37,11 +37,13 @@ class Servlet extends HttpServlet {
           throw new UnrecognizedCommandException(command);
 
         val params: Params = new Params {
-          def getInt(name: String): Int = req.getParameter(name).toInt;
+          override def getInt(name: String): Int = req.getParameter(name).toInt;
 
-          def getString(name: String): String = req.getParameter(name);
+          override def getString(name: String): String = req.getParameter(name);
 
-          def contains(name: String): Boolean = req.getParameter(name) != null;
+          override def contains(name: String): Boolean = req.getParameter(name) != null;
+
+          override def getStringArray(name: String): Array[String] = req.getParameterValues(name + "[]");
         };
 
         val ct: ContentTag = new ContentTag {

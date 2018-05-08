@@ -4,7 +4,7 @@ import java.lang.reflect.Type
 
 import com.google.gson.{GsonBuilder, JsonElement, JsonSerializationContext, JsonSerializer}
 
-import scala.collection.JavaConversions
+import scala.collection.{JavaConversions, Map}
 
 /**
   * Created by bluejoe on 2018/2/9.
@@ -20,7 +20,7 @@ object JsonUtils {
     }
   }
 
-  def map2JSON(map: Map[String, Any]): String = {
-    gson.toJson(map);
+  def toJSONString(o: Any): String = {
+    gson.toJson(o);
   }
 }

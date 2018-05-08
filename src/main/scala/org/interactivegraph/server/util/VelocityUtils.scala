@@ -3,8 +3,8 @@ package org.interactivegraph.server.util
 import java.io.StringWriter
 import java.util.Properties
 
-import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.VelocityEngine
+import org.apache.velocity.tools.ToolManager
 
 import scala.collection.JavaConversions
 
@@ -13,12 +13,15 @@ import scala.collection.JavaConversions
   */
 object VelocityUtils {
   val pro = new Properties();
+  val toolManager = new ToolManager();
+  toolManager.configure("tools.xml");
+
   pro.setProperty("input.encoding", "UTF-8");
   pro.setProperty("output.encoding", "UTF-8");
   val ve = new VelocityEngine(pro);
 
   def parse(expr: String, context: Map[String, Any]): String = {
-    val vc = new VelocityContext();
+    val vc = toolManager.createContext();
     val writer = new StringWriter();
 
     context.foreach(kv => vc.put(kv._1,
