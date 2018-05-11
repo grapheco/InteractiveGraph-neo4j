@@ -10,7 +10,7 @@
     <bean class="org.interactivegraph.server.commands.neo4j.Neo4jConnector">
         <property name="boltUrl" value="bolt://localhost:7687"/>
         <property name="boltUser" value="neo4j"/>
-        <property name="boltPassword" value="neoneo"/>
+        <property name="boltPassword" value="123456"/>
     </bean>
 
     <bean class="org.interactivegraph.server.commands.neo4j.Neo4jGraphMetaDBInMemory">
@@ -52,6 +52,9 @@ http://localhost:8088/photos/byname/${prop.name}.jpg
                 </entry>
                 <entry key="getNodesInfo">
                     <bean class="org.interactivegraph.server.commands.neo4j.GetNodesInfo"/>
+                </entry>
+                <entry key="getNodesCategories">
+                    <bean class="org.interactivegraph.server.commands.neo4j.GetNodesCategories"/>
                 </entry>
             </map>
         </property>
