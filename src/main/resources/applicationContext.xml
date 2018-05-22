@@ -56,6 +56,18 @@ http://localhost:8088/photos/byname/${prop.name}.jpg
                 <entry key="getNodesCategories">
                     <bean class="org.interactivegraph.server.commands.neo4j.GetNodesCategories"/>
                 </entry>
+                <entry key="getNeighbours">
+                    <bean class="org.interactivegraph.server.commands.neo4j.GetNeighbours"/>
+                </entry>
+                <entry key="findRelations">
+                    <bean class="org.interactivegraph.server.commands.neo4j.FindRelations"/>
+                </entry>
+                <entry key="search">
+                    <bean class="org.interactivegraph.server.commands.neo4j.Search"/>
+                </entry>
+                <entry key="filterNodesByCategory">
+                    <bean class="org.interactivegraph.server.commands.neo4j.FilterNodesByCategories"/>
+                </entry>
             </map>
         </property>
     </bean>
