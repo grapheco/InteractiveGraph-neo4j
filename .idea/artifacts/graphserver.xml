@@ -36,6 +36,8 @@
           <element id="library" level="project" name="Maven: oro:oro:2.0.8" />
           <element id="library" level="project" name="Maven: sslext:sslext:1.2-0" />
           <element id="library" level="application" name="scala-sdk-2.11.7" />
+          <element id="library" level="project" name="Maven: net.sf.ezmorph:ezmorph:1.0.6" />
+          <element id="library" level="project" name="Maven: net.sf.json-lib:json-lib:jdk15:2.4" />
         </element>
         <element id="directory" name="classes">
           <element id="module-output" name="interactivegraph-server" />
