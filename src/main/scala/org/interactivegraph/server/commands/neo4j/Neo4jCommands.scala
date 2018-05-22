@@ -1,7 +1,5 @@
 package org.interactivegraph.server.commands.neo4j
 
-import java.io.PrintWriter
-
 import org.interactivegraph.server.{JsonOutput, Params}
 import org.neo4j.driver.v1.Session
 import org.springframework.beans.factory.annotation.Autowired
@@ -65,7 +63,6 @@ class LoadGraph extends JsonOutput with WithNeo4jServer {
       meta.getSize().foreach { x => metaMap += ("degree" -> x); }
       meta.getPhotoURL().foreach { x => metaMap += ("image" -> x); }
       meta.getInfo().foreach { x => metaMap += ("info" -> x); }
-      //nodes += ("_meta" -> metaMap.toMap);
       nodes ++= metaMap
       nodes.toMap
     }.toArray
