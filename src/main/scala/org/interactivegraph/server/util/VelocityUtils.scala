@@ -1,10 +1,11 @@
 package org.interactivegraph.server.util
 
-import java.io.StringWriter
+import java.io.{File, StringWriter}
 import java.util.Properties
 
 import org.apache.velocity.app.VelocityEngine
 import org.apache.velocity.tools.ToolManager
+import org.apache.velocity.tools.config.DefaultKey
 
 import scala.collection.JavaConversions
 
@@ -20,7 +21,7 @@ object VelocityUtils {
   pro.setProperty("output.encoding", "UTF-8");
   val ve = new VelocityEngine(pro);
 
-  def parse(expr: String, context: Map[String, Any]): String = {
+  def parse(expr: String, context: Map[String, Any]): Any = {
     val vc = toolManager.createContext();
     val writer = new StringWriter();
 
@@ -33,7 +34,29 @@ object VelocityUtils {
         kv._2
       }));
 
-    ve.evaluate(vc, writer, "", expr);
-    writer.toString;
+    try {
+      if (expr.startsWith("=")) {
+        val expr1 = expr.substring(1);
+        ve.evaluate(vc, writer, "", s"#set($$__VAR=$expr1)");
+        vc.get("__VAR");
+      }
+      else {
+        ve.evaluate(vc, writer, "", expr);
+        writer.getBuffer.toString.trim
+      }
+    }
+    catch {
+      case e: Throwable =>
+        throw new WrongExpressionException(expr, e);
+    }
   }
+}
+
+class WrongExpressionException(msg: String, e: Throwable) extends RuntimeException(msg, e) {
+
+}
+
+@DefaultKey("fileTool")
+class FileSystemTool {
+  def exists(path: String) = new File(path).exists();
 }

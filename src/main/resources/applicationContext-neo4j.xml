@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="neo4jConnector" class="org.interactivegraph.server.neo4j.Neo4jConnector">
+        <property name="boltUrl" value="${neo4j.boltUrl}"/>
+        <property name="boltUser" value="${neo4j.boltUser}"/>
+        <property name="boltPassword" value="${neo4j.boltPassword}"/>
+    </bean>
+
+    <bean class="org.interactivegraph.server.neo4j.Neo4jSetting">
+        <property name="regexpSearchFields" value="${neo4j.regexpSearchFields}"/>
+        <property name="strictSearchFields" value="${neo4j.strictSearchFields}"/>
+        <property name="categories" value="${neo4j.categories}"/>
+        <property name="neo4jConnector" ref="neo4jConnector"/>
+        <property name="graphMetaDB">
+            <bean class="org.interactivegraph.server.neo4j.Neo4jGraphMetaDBInMemory">
+                <property name="neo4jConnector" ref="neo4jConnector"/>
+                <property name="visNodeProperties">
+                    <map>
+                        <entry key="label" value="${visNodeProperty.label}"/>
+                        <entry key="value" value="${visNodeProperty.value}"/>
+                        <entry key="image" value='${visNodeProperty.image}'/>
+                        <entry key="info" value="${visNodeProperty.info}"/>
+                    </map>
+                </property>
+            </bean>
+        </property>
+        <property name="commandExecutorRegistry">
+            <bean class="org.interactivegraph.server.DefaultCommandExecutorRegistry">
+                <property name="classNamePattern" value="org.interactivegraph.server.neo4j._"/>
+                <property name="extraCommands">
+                    <map>
+                        <!--
+                        <entry key="test">
+                            <bean class="org.interactivegraph.server.Test"/>
+                            </bean>
+                        </entry>
+                        -->
+                    </map>
+                </property>
+            </bean>
+        </property>
+    </bean>
+</beans>

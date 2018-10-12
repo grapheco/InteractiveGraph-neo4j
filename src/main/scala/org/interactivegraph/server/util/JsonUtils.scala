@@ -1,26 +1,59 @@
 package org.interactivegraph.server.util
 
-import java.lang.reflect.Type
+import com.google.gson._
 
-import com.google.gson.{GsonBuilder, JsonElement, JsonSerializationContext, JsonSerializer}
-
-import scala.collection.{JavaConversions, Map}
+import scala.collection.Map
 
 /**
-  * Created by bluejoe on 2018/2/9.
+  * Created by bluejoe on 2018/10/8.
   */
 object JsonUtils {
-  val gson = new GsonBuilder().
-    registerTypeHierarchyAdapter(classOf[Map[_, _]], new ScalaMapSerializer()).
-    create();
+  val gson = new GsonBuilder()
+    .setPrettyPrinting()
+    .create();
 
-  class ScalaMapSerializer extends JsonSerializer[Map[_, _]] {
-    def serialize(src: Map[_, _], typeOfSrc: Type, context: JsonSerializationContext): JsonElement = {
-      gson.toJsonTree(JavaConversions.mapAsJavaMap(src));
+  def parse(json: String): JsonElement = {
+    new JsonParser().parse(json);
+  }
+
+  def stringify(e: JsonElement): String = {
+    gson.toJson(e);
+  }
+
+  def stringify(e: Map[String, _]): String = {
+    gson.toJson(asJsonObject(e));
+  }
+
+  def asJsonArray(arr: Array[_]) = {
+    val ja = new JsonArray();
+    arr.foreach(x => ja.add(asJsonElement(x)));
+    ja;
+  }
+
+  def asJsonElement(v: Any): JsonElement = {
+    if (v.isInstanceOf[Map[_, _]]) {
+      asJsonObject(v.asInstanceOf[Map[String, _]]);
+    }
+    else if (v.isInstanceOf[Array[_]]) {
+      asJsonArray(v.asInstanceOf[Array[_]]);
+    }
+    else {
+      v match {
+        case x: String =>
+          new JsonPrimitive(x);
+        case x: Number =>
+          new JsonPrimitive(x);
+        case x: Boolean =>
+          new JsonPrimitive(x);
+      }
     }
   }
 
-  def toJSONString(o: Any): String = {
-    gson.toJson(o);
+  def asJsonObject(map: Map[String, _]) = {
+    val jo = new JsonObject();
+    map.foreach(en => {
+      jo.add(en._1, asJsonElement(en._2));
+    })
+    jo;
   }
 }
