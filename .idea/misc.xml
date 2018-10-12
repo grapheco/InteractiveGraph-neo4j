@@ -6,7 +6,8 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$USER_HOME$/IdeaProjects/igraph-server-neo4j/pom.xml" />
+        <option value="$PROJECT_DIR$/../igraph-server-neo4j/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
   </component>
@@ -21,6 +22,6 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
-    <output url="file://$USER_HOME$/IdeaProjects/InteractiveGraphServer/out" />
+    <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

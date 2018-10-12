@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" build-on-make="true" name="graphserver">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="graphserver.war">
+      <element id="artifact" artifact-name="InteractiveGraphServer:war exploded" />
+    </root>
+  </artifact>
+</component>
