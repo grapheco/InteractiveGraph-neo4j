@@ -29,6 +29,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="igraph-server-neo4j" target="1.5" />
+      <module name="InteractiveGraphServer" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>
