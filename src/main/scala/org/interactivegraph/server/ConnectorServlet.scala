@@ -23,10 +23,16 @@ class ConnectorServlet extends HttpServlet with Logging {
   var _allowOrigin: Option[String] = None;
 
   override def init(servletConfig: ServletConfig) = {
-    val configFile = servletConfig.getInitParameter("configFile");
-    val is = new InputStreamReader(new FileInputStream((
-      new File(servletConfig.getServletContext.getRealPath(configFile)))),
-      "utf-8");
+    val path: String = servletConfig.getInitParameter("configFile")
+    val configFile = new File(
+      if (path.startsWith(".")) {
+        servletConfig.getServletContext.getRealPath(path)
+      }
+      else {
+        path
+      });
+
+    val is = new InputStreamReader(new FileInputStream(configFile), "utf-8");
     val ps = new Properties();
     ps.load(is);
     is.close();

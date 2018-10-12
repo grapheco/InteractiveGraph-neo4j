@@ -8,7 +8,7 @@
         <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
         <init-param>
             <param-name>configFile</param-name>
-            <param-value>/WEB-INF/example1.properties</param-value>
+            <param-value>./WEB-INF/example1.properties</param-value>
         </init-param>
     </servlet>
 
