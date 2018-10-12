@@ -4,21 +4,16 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
     <servlet>
-        <servlet-name>GraphVizServlet</servlet-name>
-        <servlet-class>org.interactivegraph.server.Servlet</servlet-class>
+        <servlet-name>example1</servlet-name>
+        <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
+        <init-param>
+            <param-name>configFile</param-name>
+            <param-value>/WEB-INF/example1.properties</param-value>
+        </init-param>
     </servlet>
 
-    <!--loads spring beans-->
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:applicationContext*.xml</param-value>
-    </context-param>
-
     <servlet-mapping>
-        <servlet-name>GraphVizServlet</servlet-name>
-        <url-pattern>/graphviz-service</url-pattern>
+        <servlet-name>example1</servlet-name>
+        <url-pattern>/connector</url-pattern>
     </servlet-mapping>
 </web-app>
