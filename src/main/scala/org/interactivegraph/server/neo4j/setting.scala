@@ -3,28 +3,42 @@ package org.interactivegraph.server.neo4j
 import java.util.{Map => JMap}
 
 import org.interactivegraph.server.Setting
-import org.interactivegraph.server.util.{Logging, VelocityUtils}
-import org.neo4j.driver.v1._
+import org.interactivegraph.server.util.VelocityUtils
 import org.neo4j.driver.v1.types.Node
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
 
 import scala.collection.JavaConversions._
-import scala.reflect.ClassTag
 
 class Neo4jSetting extends Setting {
+  @Autowired
+  var _cypherService: CypherService = _;
+  var _backendType = "";
   var _categories: Map[String, String] = _;
 
-  def setCategories(s: String) = _categories = s.split(",").map(_.split(":")).map(x => x(0) -> x(1)).toMap;
+  def setBackendType(s: String) = _backendType = s;
+
+  def setNodeCategories(s: String) = _categories =
+    s.split(",").
+      filter(_.contains(":")).
+      map(_.split(":")).
+      map(x => x(0) -> x(1)).
+      toMap;
+
   var _regexpSearchFields: Array[String] = Array();
   var _strictSearchFields: Map[String, String] = Map[String, String]();
 
   def setRegexpSearchFields(s: String) = _regexpSearchFields = s.split(",");
 
-  def setStrictSearchFields(s: String) = _strictSearchFields = s.split(",").map(_.split(":")).map(x => x(0) -> x(1)).toMap;
-  var _neo4jConnector: Neo4jConnector = _;
+  def setStrictSearchFields(s: String) = _strictSearchFields =
+    s.split(",").
+      filter(_.contains(":")).
+      map(_.split(":")).
+      map(x => x(0) -> x(1)).
+      toMap;
 
-  def setNeo4jConnector(value: Neo4jConnector) = _neo4jConnector = value;
-  var _graphMetaDB: GraphMetaDB = null;
+  def setCypherService(value: CypherService) = _cypherService = value;
+  var _graphMetaDB: GraphMetaDB = _;
 
   def setGraphMetaDB(value: GraphMetaDB) = _graphMetaDB = value;
 }
@@ -32,16 +46,18 @@ class Neo4jSetting extends Setting {
 trait GraphMetaDB {
   def getNodesCount(): Option[Int];
 
+  def getEdgesCount(): Option[Int];
+
   def getNodeMeta(node: Node): Map[String, _];
 }
 
 class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
-  var _neo4jConnector: Neo4jConnector = null;
+  @Autowired
+  var _cypherService: CypherService = _;
   var _nodesDegreeMap = collection.mutable.Map[String, Int]();
   var _nodesCount: Option[Int] = None;
+  var _edgesCount: Option[Int] = None;
   var _graphNodeProperties = collection.mutable.Map[String, String]();
-
-  def setNeo4jConnector(value: Neo4jConnector) = _neo4jConnector = value;
 
   def setVisNodeProperties(v: JMap[String, String]) = {
     _graphNodeProperties ++= v;
@@ -49,23 +65,26 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
 
   def updateMeta() = {
     //count numbers of nodes
-    _nodesCount = Some(_neo4jConnector.querySingleObject("match (n) return count(n)", _.get(0).asInt()));
+    _nodesCount = Some(_cypherService.querySingleObject("match (n) return count(n)", _.get(0).asInt()));
+    //count numbers of nodes
+    _edgesCount = Some(_cypherService.querySingleObject("match ()-[p]->() return count(p)", _.get(0).asInt()));
+
     //calculates relations of each node
     _nodesDegreeMap.clear();
-    _neo4jConnector.queryObjects("MATCH (c)-[]-() WITH c, count(*) AS degree return id(c), degree",
+    _cypherService.queryObjects("MATCH (c)-[]-() WITH c, count(*) AS degree return id(c), degree",
       (node) => (node.get(0).toString() -> node.get(1).asInt())).foreach(x => _nodesDegreeMap.update(x._1, x._2));
   }
 
-  @throws(classOf[Exception])
   def afterPropertiesSet = updateMeta;
 
   override def getNodesCount(): Option[Int] = _nodesCount;
+  override def getEdgesCount(): Option[Int] = _edgesCount;
 
   override def getNodeMeta(node: Node): Map[String, _] = {
     val ctx = Map[String, Any]("node" -> node,
       "prop" -> (node.asMap().toMap
         + ("id" -> node.id())
-        + ("degree" -> _nodesDegreeMap("" + node.id()))
+        + ("degree" -> _nodesDegreeMap.getOrDefault("" + node.id(), 0))
         + ("labels" -> node.labels.toArray)));
 
     Map("id" -> node.id(), "categories" -> node.labels.toArray) ++
@@ -75,48 +94,5 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
           (en._1 -> VelocityUtils.parse(en._2, ctx))
         }
       }.filter(_._2 != null).toMap
-  }
-}
-
-class Neo4jConnector extends Logging {
-  var _url = "";
-  var _user = "";
-  var _pass = "";
-
-  def setBoltUrl(value: String) = _url = value;
-
-  def setBoltUser(value: String) = _user = value;
-
-  def setBoltPassword(value: String) = _pass = value;
-
-  def execute[T](f: (Session) => T): T = {
-    val driver = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
-    val session = driver.session(AccessMode.READ);
-    val result = f(session);
-    session.close();
-    driver.close();
-    result;
-  }
-
-  def queryObjects[T: ClassTag](queryString: String, fnMap: (Record => T)): Array[T] = {
-    execute((session: Session) => {
-      logger.debug(s"cypher: $queryString");
-      session.run(queryString).map(fnMap).toArray
-    });
-  }
-
-  def executeQuery[T: ClassTag](queryString: String, fn: (StatementResult => T)): T = {
-    execute((session: Session) => {
-      logger.debug(s"cypher: $queryString");
-      val result = session.run(queryString);
-      fn(result);
-    });
-  }
-
-  def querySingleObject[T](queryString: String, fnMap: (Record => T)): T = {
-    execute((session: Session) => {
-      logger.debug(s"cypher: $queryString");
-      fnMap(session.run(queryString).next())
-    });
   }
 }

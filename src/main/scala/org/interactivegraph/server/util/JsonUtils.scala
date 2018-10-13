@@ -8,6 +8,21 @@ import scala.collection.Map
   * Created by bluejoe on 2018/10/8.
   */
 object JsonUtils {
+  def getPrimitiveValue(value: JsonPrimitive): Any = {
+    (value.isBoolean, value.isNumber, value.isString) match {
+      case (true, false, false) => value.getAsBoolean;
+      case (false, true, false) => Some(value.getAsNumber).map(num =>
+        if (num.toString.contains(".")) {
+          num.doubleValue()
+        }
+        else {
+          num.intValue()
+        }
+      ).get;
+      case (false, false, true) => value.getAsString;
+    }
+  }
+
   val gson = new GsonBuilder()
     .setPrettyPrinting()
     .create();

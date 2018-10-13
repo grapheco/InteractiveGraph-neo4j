@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="neo4jConnector" class="org.interactivegraph.server.neo4j.Neo4jConnector">
-        <property name="boltUrl" value="${neo4j.boltUrl}"/>
-        <property name="boltUser" value="${neo4j.boltUser}"/>
-        <property name="boltPassword" value="${neo4j.boltPassword}"/>
-    </bean>
+    <context:annotation-config/>
+    <context:component-scan base-package="org.interactivegraph.server"/>
 
     <bean class="org.interactivegraph.server.neo4j.Neo4jSetting">
+        <property name="backendType" value="${backendType}"/>
         <property name="regexpSearchFields" value="${neo4j.regexpSearchFields}"/>
         <property name="strictSearchFields" value="${neo4j.strictSearchFields}"/>
-        <property name="categories" value="${neo4j.categories}"/>
-        <property name="neo4jConnector" ref="neo4jConnector"/>
+        <property name="nodeCategories" value="${neo4j.nodeCategories}"/>
         <property name="graphMetaDB">
             <bean class="org.interactivegraph.server.neo4j.Neo4jGraphMetaDBInMemory">
-                <property name="neo4jConnector" ref="neo4jConnector"/>
                 <property name="visNodeProperties">
                     <map>
                         <entry key="label" value="${visNodeProperty.label}"/>
