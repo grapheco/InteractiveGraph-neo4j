@@ -45,7 +45,12 @@ trait Neo4jCommandExecutor extends CommandExecutor {
 
 class Init extends JsonCommandExecutor with Neo4jCommandExecutor {
   def execute(request: JsonObject): Map[String, _] = {
-    Map("product" -> "neo4j", "categories" -> setting()._categories);
+    Map("product" -> "neo4j",
+      "backendType" -> setting()._backendType,
+      "categories" -> setting()._categories
+    ) ++
+      setting()._graphMetaDB.getNodesCount().map("nodesCount" -> _) ++
+      setting()._graphMetaDB.getEdgesCount().map("edgesCount" -> _)
   }
 }
 
@@ -56,12 +61,12 @@ class GetNeighbours extends JsonCommandExecutor with Neo4jCommandExecutor {
     val query1 = s"start n=node($id) match (n)-[p]-(x) return distinct p";
     val query2 = s"start n=node($id) match (n)-[p]-(x) return distinct x";
     Map("neighbourEdges" ->
-      setting()._neo4jConnector.queryObjects(query1, {
+      setting()._cypherService.queryObjects(query1, {
         record =>
           wrapRelationship(record.get(0).asRelationship());
       }),
       "neighbourNodes" ->
-        setting()._neo4jConnector.queryObjects(query2, {
+        setting()._cypherService.queryObjects(query2, {
           record =>
             wrapNode(record.get(0).asNode());
         }));
@@ -74,7 +79,7 @@ class GetNodesInfo extends JsonCommandExecutor with Neo4jCommandExecutor {
     val ids = request.getAsJsonArray("nodeIds").map(_.getAsString).reduce(_ + "," + _);
     val query = s"match (n) where id(n) in [$ids] return n";
     Map("infos" ->
-      setting()._neo4jConnector.queryObjects(query, {
+      setting()._cypherService.queryObjects(query, {
         record =>
           val node = record.get(0).asNode();
           wrapNode(node).getOrElse("info", null);
@@ -88,7 +93,7 @@ class FilterNodesByCategory extends JsonCommandExecutor with Neo4jCommandExecuto
     val category = request.get("catagory").getAsString;
     val ids = request.getAsJsonArray("nodeIds").map(_.getAsString).reduce(_ + "," + _);
     val query = s"match (n:$category) where id(n) in [$ids] return n";
-    val filteredNodeIds = setting()._neo4jConnector.queryObjects(query, {
+    val filteredNodeIds = setting()._cypherService.queryObjects(query, {
       record =>
         val node = record.get(0).asNode();
         node.id();
@@ -128,7 +133,7 @@ class Search extends JsonCommandExecutor with Neo4jCommandExecutor {
       }.reduce(_ + " and " + _);
     }.map { filter =>
       val query = s"match (n) where ${filter} return n limit ${limit}";
-      setting()._neo4jConnector.queryObjects(query, {
+      setting()._cypherService.queryObjects(query, {
         record =>
           val node = record.get(0).asNode();
           wrapNode(node);
@@ -142,7 +147,7 @@ class Search extends JsonCommandExecutor with Neo4jCommandExecutor {
     val filter = setting()._regexpSearchFields.map(x => s"n.${x} =~ '${expr}.*'").reduce(_ + " and " + _);
     val query = s"match (n) where ${filter} return n limit ${limit}";
 
-    setting()._neo4jConnector.queryObjects(query, {
+    setting()._cypherService.queryObjects(query, {
       record =>
         val node = record.get(0).asNode();
         wrapNode(node);
@@ -153,7 +158,7 @@ class Search extends JsonCommandExecutor with Neo4jCommandExecutor {
 class LoadGraph extends JsonCommandExecutor with Neo4jCommandExecutor {
 
   def execute(request: JsonObject): Map[String, _] = {
-    setting()._neo4jConnector.execute { (session: Session) =>
+    setting()._cypherService.execute { (session: Session) =>
       val nodes = queryNodes(session);
       val edges = queryEdges(session);
       Map[String, Any]("nodes" -> nodes, "edges" -> edges);
@@ -189,7 +194,7 @@ object FindRelationsTaskManager {
     val paths = ArrayBuffer[Map[_, _]]();
     val thread = new Thread(new Runnable() {
       override def run(): Unit = {
-        executor.setting()._neo4jConnector.executeQuery(query, {
+        executor.setting()._cypherService.executeQuery(query, {
           result: StatementResult =>
             lock.countDown();
             while (result.hasNext && !flagStop) {

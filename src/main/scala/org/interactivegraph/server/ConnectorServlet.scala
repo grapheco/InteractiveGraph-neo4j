@@ -6,10 +6,10 @@ import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import org.apache.commons.io.IOUtils
-import org.interactivegraph.server.util.JsonUtils
+import org.interactivegraph.server.util.{ServletContextUtils, JsonUtils, Logging}
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
-import org.springframework.beans.factory.xml.XmlBeanFactory
-import org.springframework.core.io.ClassPathResource
+import org.springframework.context.support.FileSystemXmlApplicationContext
+import org.springframework.web.context.support.{WebApplicationContextUtils, XmlWebApplicationContext}
 
 import scala.collection.{JavaConversions, mutable}
 
@@ -23,14 +23,18 @@ class ConnectorServlet extends HttpServlet with Logging {
   var _allowOrigin: Option[String] = None;
 
   override def init(servletConfig: ServletConfig) = {
+    ServletContextUtils.setServletContext(servletConfig.getServletContext);
+
+    //load conf file
     val path: String = servletConfig.getInitParameter("configFile")
-    val configFile = new File(
-      if (path.startsWith(".")) {
-        servletConfig.getServletContext.getRealPath(path)
+    val configFile = Some(new File(path)).map { file =>
+      if (file.isAbsolute) {
+        file;
       }
       else {
-        path
-      });
+        new File(servletConfig.getServletContext.getRealPath("/" + path));
+      }
+    }.get
 
     val is = new InputStreamReader(new FileInputStream(configFile), "utf-8");
     val ps = new Properties();
@@ -41,18 +45,20 @@ class ConnectorServlet extends HttpServlet with Logging {
     val map = JavaConversions.propertiesAsScalaMap(ps);
 
     _allowOrigin = map.get("allowOrigin");
-    val xmlFile = map("backendType") match {
-      case "neo4j" => "/applicationContext-neo4j.xml";
-      case _ => throw new UnknownBackendTypeException(map("backendType"));
-    }
+    val backendType = map("backendType").toLowerCase();
 
-    val beanFactory = new XmlBeanFactory(new ClassPathResource(xmlFile));
+    val appctx = new FileSystemXmlApplicationContext();
+
+    //enable expr like ${neo4j.boltUser}
     val placeholder = new PropertyPlaceholderConfigurer();
     placeholder.setProperties(ps);
     placeholder.setIgnoreUnresolvablePlaceholders(true);
-    placeholder.postProcessBeanFactory(beanFactory);
+    appctx.addBeanFactoryPostProcessor(placeholder);
 
-    _setting = beanFactory.getBean(classOf[Setting]);
+    appctx.setConfigLocation(s"classpath:${backendType}.xml");
+    appctx.refresh();
+
+    _setting = appctx.getBean(classOf[Setting]);
     logger.info(s"loaded setting: ${_setting}");
     _commandRegistry = _setting._executors;
   }
@@ -130,6 +136,7 @@ class ConnectorServlet extends HttpServlet with Logging {
   }
 }
 
-class UnknownBackendTypeException(typeName: String) extends RuntimeException(s"unknown backend type: $typeName") {
+class UnknownBackendTypeException(typeName: String) extends
+  RuntimeException(s"unknown backend type: $typeName") {
 
 }
