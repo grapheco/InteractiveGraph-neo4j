@@ -14,7 +14,7 @@ The interaction architecture looks like:
 
 # Quick Start
 
-1. download latest `graphserver.war` file from <a href="releases">release page</a>
+1. download latest `graphserver.war` file from release page: https://github.com/bluejoe2008/InteractiveGraphServer/releases
 
 1. move `graphserver.war` file in your `webapps` folder of Web server (Tomcat, for example)
 
