@@ -6,10 +6,9 @@ import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import org.apache.commons.io.IOUtils
-import org.interactivegraph.server.util.{ServletContextUtils, JsonUtils, Logging}
+import org.interactivegraph.server.util.{JsonUtils, Logging, ServletContextUtils}
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
 import org.springframework.context.support.FileSystemXmlApplicationContext
-import org.springframework.web.context.support.{WebApplicationContextUtils, XmlWebApplicationContext}
 
 import scala.collection.{JavaConversions, mutable}
 

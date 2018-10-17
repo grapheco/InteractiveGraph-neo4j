@@ -8,3 +8,4 @@
 /web/WEB-INF/test-classes/
 !/.idea/
 .DS_Store
+/docs/

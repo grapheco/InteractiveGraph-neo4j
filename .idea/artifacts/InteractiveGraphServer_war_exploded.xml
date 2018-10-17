@@ -14,7 +14,6 @@
           <element id="library" level="project" name="Maven: org.springframework:spring-beans:4.0.0.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-core:4.0.0.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-expression:4.0.0.RELEASE" />
-          <element id="library" level="project" name="Maven: org.springframework:spring-web:4.0.0.RELEASE" />
           <element id="library" level="project" name="Maven: aopalliance:aopalliance:1.0" />
           <element id="library" level="project" name="Maven: org.apache.velocity:velocity:1.7" />
           <element id="library" level="project" name="Maven: commons-collections:commons-collections:3.2.1" />
@@ -56,10 +55,7 @@
           <element id="library" level="project" name="Maven: org.apache.lucene:lucene-queryparser:5.5.5" />
           <element id="library" level="project" name="Maven: org.bouncycastle:bcpkix-jdk15on:1.59" />
           <element id="library" level="project" name="Maven: org.bouncycastle:bcprov-jdk15on:1.59" />
-          <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.13" />
-          <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.13" />
           <element id="library" level="project" name="Maven: org.jprocesses:jProcesses:1.6.4" />
-          <element id="library" level="project" name="Maven: org.neo4j:neo4j-bolt:3.4.0" />
           <element id="library" level="project" name="Maven: org.neo4j:neo4j-codegen:3.4.0" />
           <element id="library" level="project" name="Maven: org.neo4j:neo4j-collections:3.4.0" />
           <element id="library" level="project" name="Maven: org.neo4j:neo4j-command-line:3.4.0" />
@@ -115,6 +111,9 @@
           <element id="library" level="project" name="Maven: org.parboiled:parboiled-core:1.1.7" />
           <element id="library" level="project" name="Maven: org.parboiled:parboiled-scala_2.11:1.1.7" />
           <element id="library" level="project" name="Maven: org.scala-lang:scala-reflect:2.11.12" />
+          <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.13" />
+          <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.13" />
+          <element id="library" level="project" name="Maven: org.neo4j:neo4j-bolt:3.4.0" />
         </element>
       </element>
       <element id="javaee-facet-resources" facet="InteractiveGraphServer/web/Web" />

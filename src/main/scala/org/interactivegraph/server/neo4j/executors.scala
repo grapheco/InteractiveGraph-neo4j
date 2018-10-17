@@ -257,11 +257,9 @@ class GetMoreRelations extends JsonCommandExecutor with Neo4jCommandExecutor {
     val task = FindRelationsTaskManager.getTask(queryId);
     val (paths, hasMore) = task.readMore(10);
 
-    Map("queryResults" ->
-      Map("completed" -> task.isCompleted,
-        "queryId" -> task.taskId,
-        "paths" -> paths)
-    );
+    Map("completed" -> task.isCompleted,
+      "queryId" -> task.taskId,
+      "paths" -> paths);
   }
 }
 
