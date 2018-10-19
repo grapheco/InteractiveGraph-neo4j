@@ -10,4 +10,4 @@
 
 最新版详见 https://github.com/bluejoe2008/InteractiveGraphServer, 欢迎star和提交PR。
 
-InteractiveGraphServer基于Neo4j数据库为InteractiveGraph提供服务器后端。InteractiveGraph(https://github.com/bluejoe2008/InteractiveGraph)为大型图数据提供了一个基于web的交互操作框架，其数据可以来自于GSON文件，或者在线Neo4j图数据库。
+InteractiveGraphServer基于Neo4j数据库为InteractiveGraph提供服务器后端。InteractiveGraph (https://github.com/bluejoe2008/InteractiveGraph) 为大型图数据提供了一个基于web的交互操作框架，其数据可以来自于GSON文件，或者在线Neo4j图数据库。
