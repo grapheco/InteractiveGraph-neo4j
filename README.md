@@ -1,20 +1,20 @@
-# InteractiveGraphServer
+# InteractiveGraph-neo4j
 
-[![GitHub releases](https://img.shields.io/github/release/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/releases)
-[![GitHub downloads](https://img.shields.io/github/downloads/bluejoe2008/InteractiveGraphServer/total.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/releases)
-[![GitHub issues](https://img.shields.io/github/issues/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/issues)
-[![GitHub forks](https://img.shields.io/github/forks/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/network)
-[![GitHub stars](https://img.shields.io/github/stars/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/stargazers)
-[![GitHub license](https://img.shields.io/github/license/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/blob/master/LICENSE)
+[![GitHub releases](https://img.shields.io/github/release/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/bluejoe2008/InteractiveGraph-neo4j/total.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/releases)
+[![GitHub issues](https://img.shields.io/github/issues/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/issues)
+[![GitHub forks](https://img.shields.io/github/forks/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/network)
+[![GitHub stars](https://img.shields.io/github/stars/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/stargazers)
+[![GitHub license](https://img.shields.io/github/license/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/blob/master/LICENSE)
 
-InteractiveGraphServer serves GSON files(see https://github.com/bluejoe2008/InteractiveGraph#GSON), Neo4j databases, RDF stores as `InteractiveGraph` providers, it generates `InteractiveGraph`s for remote frontend `InteractiveGraph` clients on demand. Known `InteractiveGraph` clients includes GraphNavigator, GraphBrowser, and RelFinder (see https://github.com/bluejoe2008/InteractiveGraph).
+InteractiveGraph-neo4j serves GSON files(see https://github.com/bluejoe2008/InteractiveGraph#GSON), Neo4j databases, RDF stores as `InteractiveGraph` providers, it generates `InteractiveGraph`s for remote frontend `InteractiveGraph` clients on demand. Known `InteractiveGraph` clients includes GraphNavigator, GraphBrowser, and RelFinder (see https://github.com/bluejoe2008/InteractiveGraph).
 
 The interaction architecture looks like:
 ![architecture](./arch.png)
 
 # Quick Start
 
-1. download latest `graphserver.war` and `igraph.war` file from release page: https://github.com/bluejoe2008/InteractiveGraphServer/releases
+1. download latest `graphserver.war` and `igraph.war` file from release page: https://github.com/bluejoe2008/InteractiveGraph-neo4j/releases
 
 `graphserver.war`: graph server app
 `igraph.war`: interactive graph clients, including GraphNavigator, GraphBrowser, and RelFinder.
