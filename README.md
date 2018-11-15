@@ -1,30 +1,44 @@
-# InteractiveGraphServer
+# InteractiveGraph-neo4j
 
-[![GitHub releases](https://img.shields.io/github/release/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/releases)
-[![GitHub downloads](https://img.shields.io/github/downloads/bluejoe2008/InteractiveGraphServer/total.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/releases)
-[![GitHub issues](https://img.shields.io/github/issues/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/issues)
-[![GitHub forks](https://img.shields.io/github/forks/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/network)
-[![GitHub stars](https://img.shields.io/github/stars/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/stargazers)
-[![GitHub license](https://img.shields.io/github/license/bluejoe2008/InteractiveGraphServer.svg)](https://github.com/bluejoe2008/InteractiveGraphServer/blob/master/LICENSE)
+[![GitHub releases](https://img.shields.io/github/release/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/bluejoe2008/InteractiveGraph-neo4j/total.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/releases)
+[![GitHub issues](https://img.shields.io/github/issues/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/issues)
+[![GitHub forks](https://img.shields.io/github/forks/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/network)
+[![GitHub stars](https://img.shields.io/github/stars/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/stargazers)
+[![GitHub license](https://img.shields.io/github/license/bluejoe2008/InteractiveGraph-neo4j.svg)](https://github.com/bluejoe2008/InteractiveGraph-neo4j/blob/master/LICENSE)
 
-InteractiveGraphServer serves GSON files(see https://github.com/bluejoe2008/InteractiveGraph#GSON), Neo4j databases, RDF stores as `InteractiveGraph` providers, it generates `InteractiveGraph`s for remote frontend `InteractiveGraph` clients on demand. Known `InteractiveGraph` clients includes GraphNavigator, GraphBrowser, and RelFinder (see https://github.com/bluejoe2008/InteractiveGraph).
+InteractiveGraph-neo4j serves GSON files(see https://github.com/bluejoe2008/InteractiveGraph#GSON), Neo4j databases, RDF stores as `InteractiveGraph` providers, it generates `InteractiveGraph`s for remote frontend `InteractiveGraph` clients on demand. Known `InteractiveGraph` clients includes GraphNavigator, GraphBrowser, and RelFinder (see https://github.com/bluejoe2008/InteractiveGraph).
 
 The interaction architecture looks like:
 ![architecture](./arch.png)
 
 # Quick Start
 
-1. download latest `graphserver.war` file from release page: https://github.com/bluejoe2008/InteractiveGraphServer/releases
+1. download latest `graphserver.war` and `igraph.war` file from release page: https://github.com/bluejoe2008/InteractiveGraph-neo4j/releases
 
-1. move `graphserver.war` file in your `webapps` folder of Web server (Tomcat, for example)
+`graphserver.war`: graph server app
+`igraph.war`: interactive graph clients, including GraphNavigator, GraphBrowser, and RelFinder.
 
-1. start Web server, we assume the web app url is http://yourhost/graphserver
+1. move war files into your `webapps` folder of Web server (Tomcat, for example)
 
-1. start InteractiveGraph/GraphBrowser(see https://github.com/bluejoe2008/InteractiveGraph) in Web browser.
+1. start Web server, we assume the web app url is http://yourhost:8080
 
-1. click the `load remote IGP server` tool, in the dialog input connector url like: `http://yourhost/graphserver/connector-gson`, InteractiveGraph/GraphBrowser will load and visualize graph from graphserver.
+1. explore InteractiveGraph/GraphBrowser in Web browser:
+```
+http://yourhost:8080/igraph/example12.html
+```
+
+# Accessing servers in InteractiveGraph apps
+
+1. If you are using a remote graph app, GraphBrowser, for example. To access IGP servers, you may click the `load remote IGP server` tool, in the dialog input connector url like: `http://yourhost:8080/graphserver/connector-gson`, InteractiveGraph/GraphBrowser will load and visualize graph from graphserver.
 
 ![architecture](./igptool.png)
+
+1. To access IGP servers programmly, you may use `app.connect()` method. Here is an example:
+```
+    var app = new igraph.GraphNavigator(document.getElementById('graphArea'));
+    app.connect("http://yourhost:8080/graphserver/connector-neodb");
+```
 
 NOTE: `graphserver` provides 3 servlets: `/connector-gson`, `/connector-bolt`, `/connector-neodb`. Because the `/connector-bolt` depends on `/connector-neodb`, so note that `/connector-neodb` should be accessed before accessing `/connector-bolt`.
 
