@@ -98,7 +98,7 @@ class ConnectorServlet extends HttpServlet with Logging {
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse) = {
     val is = req.getInputStream;
-    val body = IOUtils.toString(is);
+    val body = IOUtils.toString(is, "utf-8");
     val requestBody = JsonUtils.parse(body).getAsJsonObject;
     val command = req.getParameter("command");
 
