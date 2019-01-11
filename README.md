@@ -14,7 +14,7 @@ The interaction architecture looks like:
 
 # Quick Start
 
-1. download latest `graphserver.war` and `igraph.war` file from release page: https://github.com/grapheco/InteractiveGraph-neo4j/releases
+1. download latest `graphserver.war` and `igraph.war` file from release page: https://github.com/grapheco/InteractiveGraph-neo4j/releases  and https://github.com/grapheco/InteractiveGraph/releases 
 
 `graphserver.war`: graph server app
 `igraph.war`: interactive graph clients, including GraphNavigator, GraphBrowser, and RelFinder.
