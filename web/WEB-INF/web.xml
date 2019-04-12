@@ -41,5 +41,26 @@
         <servlet-name>connector3</servlet-name>
         <url-pattern>/connector-gson</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>connector4</servlet-name>
+        <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
+        <init-param>
+            <param-name>configFile</param-name>
+            <param-value>WEB-INF/conf4.properties</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>connector4</servlet-name>
+        <url-pattern>/connector-pidb</url-pattern>
+    </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.jpg</url-pattern>
+    </servlet-mapping>
 </web-app>
