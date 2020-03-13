@@ -5,7 +5,7 @@
 
     <import resource="neo4j-base.xml"/>
 
-    <bean class="org.interactivegraph.server.neo4j.Neo4jDatabaseService">
+    <bean class="org.grapheco.server.neo4j.Neo4jDatabaseService">
         <property name="dataDir" value="${neo4j.dataDir}"/>
         <property name="boltPort" value="${neo4j.boltPort}"/>
     </bean>

@@ -4,28 +4,30 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:annotation-config/>
-    <context:component-scan base-package="org.interactivegraph.server"/>
+    <context:component-scan base-package="org.grapheco.server"/>
 
-    <bean class="org.interactivegraph.server.neo4j.Neo4jSetting">
+    <bean class="org.grapheco.server.neo4j.Neo4jSetting">
         <property name="backendType" value="${backendType}"/>
         <property name="regexpSearchFields" value="${neo4j.regexpSearchFields}"/>
         <property name="strictSearchFields" value="${neo4j.strictSearchFields}"/>
         <property name="nodeCategories" value="${neo4j.nodeCategories}"/>
         <property name="graphMetaDB">
-            <bean class="org.interactivegraph.server.neo4j.Neo4jGraphMetaDBInMemory">
+            <bean class="org.grapheco.server.neo4j.Neo4jGraphMetaDBInMemory">
                 <property name="visNodeProperties">
                     <map>
                         <entry key="label" value="${visNodeProperty.label}"/>
                         <entry key="value" value="${visNodeProperty.value}"/>
                         <entry key="image" value='${visNodeProperty.image}'/>
                         <entry key="info" value="${visNodeProperty.info}"/>
+                        <entry key="x" value="${visNodeProperty.x}"/>
+                        <entry key="y" value="${visNodeProperty.y}"/>
                     </map>
                 </property>
             </bean>
         </property>
         <property name="commandExecutorRegistry">
-            <bean class="org.interactivegraph.server.DefaultCommandExecutorRegistry">
-                <property name="classNamePattern" value="org.interactivegraph.server.neo4j._"/>
+            <bean class="org.grapheco.server.DefaultCommandExecutorRegistry">
+                <property name="classNamePattern" value="org.grapheco.server.neo4j._"/>
                 <property name="extraCommands">
                     <map>
                         <!--
