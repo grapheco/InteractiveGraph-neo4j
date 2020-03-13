@@ -5,7 +5,7 @@
          version="3.1">
     <servlet>
         <servlet-name>connector1</servlet-name>
-        <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
+        <servlet-class>org.grapheco.server.ConnectorServlet</servlet-class>
         <init-param>
             <param-name>configFile</param-name>
             <param-value>WEB-INF/conf1.properties</param-value>
@@ -18,7 +18,7 @@
 
     <servlet>
         <servlet-name>connector2</servlet-name>
-        <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
+        <servlet-class>org.grapheco.server.ConnectorServlet</servlet-class>
         <init-param>
             <param-name>configFile</param-name>
             <param-value>WEB-INF/conf2.properties</param-value>
@@ -31,7 +31,7 @@
 
     <servlet>
         <servlet-name>connector3</servlet-name>
-        <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
+        <servlet-class>org.grapheco.server.ConnectorServlet</servlet-class>
         <init-param>
             <param-name>configFile</param-name>
             <param-value>WEB-INF/conf3.properties</param-value>
@@ -43,7 +43,7 @@
     </servlet-mapping>
     <servlet>
         <servlet-name>connector4</servlet-name>
-        <servlet-class>org.interactivegraph.server.ConnectorServlet</servlet-class>
+        <servlet-class>org.grapheco.server.ConnectorServlet</servlet-class>
         <init-param>
             <param-name>configFile</param-name>
             <param-value>WEB-INF/conf4.properties</param-value>
