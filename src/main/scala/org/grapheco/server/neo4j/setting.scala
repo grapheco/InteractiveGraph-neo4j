@@ -3,18 +3,20 @@ package org.grapheco.server.neo4j
 import java.util.{Map => JMap}
 
 import org.grapheco.server.Setting
-import org.grapheco.server.util.VelocityUtils
+import org.grapheco.server.util.{Edge, Layout, VelocityUtils}
 import org.neo4j.driver.v1.types.Node
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 
 import scala.collection.JavaConversions._
+import org.grapheco.server.util.Graph
 
 class Neo4jSetting extends Setting {
   @Autowired
   var _cypherService: CypherService = _;
   var _backendType = "";
   var _categories: Map[String, String] = _;
+
 
   def setBackendType(s: String) = _backendType = s;
 
@@ -41,6 +43,22 @@ class Neo4jSetting extends Setting {
   var _graphMetaDB: GraphMetaDB = _;
 
   def setGraphMetaDB(value: GraphMetaDB) = _graphMetaDB = value;
+
+
+
+  def setLayout(value: Boolean) = {
+    if (value)
+      Layout.layout(new org.grapheco.server.util.Graph(
+        _cypherService.queryObjects("match (n) return n.id,labels(n)",
+          r => new org.grapheco.server.util.Node(r.get(0).asInt(), r.get(1).asList().get(0).toString)).toList,
+        _cypherService.queryObjects("match (n)-[r]->(n2) return n.id, n2.id",
+          r => new Edge(r.get(0).asInt(), r.get(1).asInt())).toList
+      ), 100)._nodes.foreach(node =>
+        _cypherService.aliveExecute(s =>
+          s.run("match (n:"+node._label+") where n.id = "+node._id+" set n.x = "+node._x+" , n.y = "+node._y)
+        )
+      )
+  }
 }
 
 trait GraphMetaDB {
