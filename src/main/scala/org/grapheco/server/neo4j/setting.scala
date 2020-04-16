@@ -47,17 +47,23 @@ class Neo4jSetting extends Setting {
 
 
   def setLayout(value: Boolean) = {
-    if (value)
+    if (value) {
       Layout.layout(new org.grapheco.server.util.Graph(
-        _cypherService.queryObjects("match (n) return n.id,labels(n)",
+        _cypherService.queryObjects("match (n) return id(n),labels(n)",
           r => new org.grapheco.server.util.Node(r.get(0).asInt(), r.get(1).asList().get(0).toString)).toList,
-        _cypherService.queryObjects("match (n)-[r]->(n2) return n.id, n2.id",
+        _cypherService.queryObjects("match (n)-[r]->(n2) return id(n), id(n2)",
           r => new Edge(r.get(0).asInt(), r.get(1).asInt())).toList
       ), 100)._nodes.foreach(node =>
         _cypherService.aliveExecute(s =>
-          s.run("match (n:"+node._label+") where n.id = "+node._id+" set n.x = "+node._x+" , n.y = "+node._y)
+          s.run("match (n:" + node._label + ") where id(n) = " + node._id + " set n.x = " + node._x + " , n.y = " + node._y)
         )
       )
+      for (c<-_categories){
+        _cypherService.execute(s=>s.run(s"CREATE INDEX ON :${c._1}(x)"))
+        _cypherService.execute(s=>s.run(s"CREATE INDEX ON :${c._1}(y)"))
+      }
+
+    }
   }
 }
 
@@ -89,8 +95,8 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
 
     //calculates relations of each node
     _nodesDegreeMap.clear();
-    _cypherService.queryObjects("MATCH (c)-[]-() WITH c, count(*) AS degree return id(c), degree",
-      (node) => (node.get(0).toString() -> node.get(1).asInt())).foreach(x => _nodesDegreeMap.update(x._1, x._2));
+//    _cypherService.queryObjects("MATCH (c)-[]-() WITH c, count(*) AS degree return id(c), degree",
+//      (node) => (node.get(0).toString() -> node.get(1).asInt())).foreach(x => _nodesDegreeMap.update(x._1, x._2));
   }
 
   def afterPropertiesSet = updateMeta;

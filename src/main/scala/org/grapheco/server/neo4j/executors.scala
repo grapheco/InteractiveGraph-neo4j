@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.google.gson.JsonObject
 import org.grapheco.server.{CommandExecutor, JsonCommandExecutor, Setting}
-import org.neo4j.cypher.internal.v3_4.expressions.True
+
 import org.neo4j.driver.v1.types.{Node, Path, Relationship}
 import org.neo4j.driver.v1.{Session, StatementResult}
 
@@ -46,9 +46,7 @@ trait Neo4jCommandExecutor extends CommandExecutor {
 
 class Init extends JsonCommandExecutor with Neo4jCommandExecutor {
   def execute(request: JsonObject): Map[String, _] = {
-    setting()._cypherService.querySingleObject("match (n) return n limit 1", rsl=> {
-      printf(rsl.keys().toString)
-    });
+
     Map("product" -> "neo4j",
       "backendType" -> setting()._backendType,
       "categories" -> setting()._categories
@@ -102,7 +100,7 @@ class FilterNodesByCategory extends JsonCommandExecutor with Neo4jCommandExecuto
   def execute(request: JsonObject): Map[String, _] = {
     val category = request.get("catagory").getAsString;
     val ids = request.getAsJsonArray("nodeIds").map(_.getAsString).reduce(_ + "," + _);
-    val query = s"match (n:$category) where id(n) in [$ids] return n";
+    val query = s"match (n:$category) where id(n) in [$ids] return n limit 10000";
     val filteredNodeIds = setting()._cypherService.queryObjects(query, {
       record =>
         val node = record.get(0).asNode();
@@ -153,9 +151,15 @@ class Search extends JsonCommandExecutor with Neo4jCommandExecutor {
     };
   }
 
-  def regexpSearch(expr: String, limit: Number): Array[_] = {
-    val filter = setting()._regexpSearchFields.map(x => s"n.${x} =~ '${expr}.*'").reduce(_ + " and " + _);
-    val query = s"match (n) where ${filter} return n limit ${limit}";
+  def regexpSearch(exp: String, limit: Number): Array[_] = {
+    var expr: String = exp;
+    var label: String = null;
+    if(expr.contains(':')) {
+      label = expr.split(':')(0);
+      expr = expr.split(':')(1);
+    }
+    val filter = setting()._regexpSearchFields.map(x => s"n.${x} starts with '${expr}'").reduce(_ + " and " + _);
+    val query = s"match (n${ if(label!=null && !label.equals("")){":"+label}}) where ${filter} return n limit ${limit}";
 
     setting()._cypherService.queryObjects(query, {
       record =>
@@ -193,14 +197,14 @@ class LoadGraph extends JsonCommandExecutor with Neo4jCommandExecutor {
   }
 
   private def queryEdges(session: Session): Array[Map[String, Any]] = {
-    session.run("MATCH p=()-->() RETURN p").map { result =>
+    session.run("MATCH p=()-->() RETURN p limit 10000").map { result =>
       val rel = result.get("p").asPath().relationships().iterator().next();
       wrapRelationship(rel);
     }.toArray
   }
 
   private def queryNodes(session: Session): Array[Map[String, Any]] = {
-    session.run("MATCH (n) RETURN n").map { result =>
+    session.run("MATCH (n) RETURN n limit 10000").map { result =>
       val node = result.get("n").asNode();
       wrapNode(node);
     }.toArray
@@ -328,7 +332,7 @@ class FindRelations extends JsonCommandExecutor with Neo4jCommandExecutor {
     val endNodeId = request.get("endNodeId").getAsString;
     val maxDepth = request.get("maxDepth").getAsNumber;
 
-    val query = s"start m=node($startNodeId), n=node($endNodeId) match p=(m)-[*1..$maxDepth]-(n) RETURN p";
+    val query = s"match p=(m)-[*1..$maxDepth]-(n) where id(m)=${startNodeId} and id(n) = ${endNodeId} RETURN p";
     val task = FindRelationsTaskManager.createTask(this, query);
     Thread.sleep(1);
     task.waitForExecution();
