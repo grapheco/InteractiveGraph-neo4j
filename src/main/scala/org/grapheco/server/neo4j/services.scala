@@ -77,6 +77,7 @@ class BoltService extends Logging with CypherService {
   override def queryObjects[T: ClassTag](queryString: String, fnMap: (Record => T)): Array[T] = {
     execute((session: Session) => {
       logger.debug(s"cypher: $queryString");
+      print(s"cypher: $queryString");
       session.run(queryString).map(fnMap).toArray
     });
   }
@@ -84,6 +85,7 @@ class BoltService extends Logging with CypherService {
   override def executeQuery[T](queryString: String, fn: (StatementResult => T)): T = {
     execute((session: Session) => {
       logger.debug(s"cypher: $queryString");
+      print(s"cypher: $queryString");
       val result = session.run(queryString);
       fn(result);
     });

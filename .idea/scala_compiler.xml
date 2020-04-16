@@ -3,5 +3,8 @@
   <component name="ScalaCompilerConfiguration">
     <option name="implicitConversions" value="true" />
     <option name="specialization" value="false" />
+    <parameters>
+      <parameter value="-target:jvm-1.8" />
+    </parameters>
   </component>
 </project>

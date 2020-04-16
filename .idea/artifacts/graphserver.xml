@@ -3,6 +3,11 @@
     <output-path>$PROJECT_DIR$/target</output-path>
     <root id="archive" name="graphserver.war">
       <element id="artifact" artifact-name="InteractiveGraphServer:war exploded" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="lib">
+          <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/pidb-engine-0.1.jar" />
+        </element>
+      </element>
     </root>
   </artifact>
 </component>

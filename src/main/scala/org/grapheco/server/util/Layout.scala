@@ -1,5 +1,6 @@
 package org.grapheco.server.util
 
+import scala.collection.mutable
 import scala.math.sqrt
 import scala.math.random
 import scala.math.floor
@@ -43,7 +44,6 @@ object Layout {
 
     val nodes = graph._nodes
     val edges = graph._edges
-    println(graph._nodes(0)._label)
     // init setting
     val initSize = 3 * sqrt(nodes.size).round
     val area = L_BASE * W_BASE * nodes.size
@@ -55,8 +55,8 @@ object Layout {
     var diffx = .0
     var diffy = .0
     var diff = .0
-    var dispx:Map[Int, Double] = Map[Int, Double]()
-    var dispy:Map[Int, Double] = Map[Int, Double]()
+    var dispx:mutable.Map[Int,Double] = mutable.Map[Int,Double]()
+    var dispy:mutable.Map[Int,Double] = mutable.Map[Int,Double]()
 
     // random init
     println("layout: init")
