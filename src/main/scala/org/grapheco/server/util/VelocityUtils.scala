@@ -25,7 +25,11 @@ object VelocityUtils {
   pro.setProperty("input.encoding", "UTF-8");
   pro.setProperty("output.encoding", "UTF-8");
   val ve = new VelocityEngine(pro);
-
+  val props = new Properties()
+  props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem")
+  props.put("runtime.log.logsystem.log4j.category", "velocity")
+  props.put("runtime.log.logsystem.log4j.logger", "velocity")
+  ve.init(props)
   def parse(expr: String, context: Map[String, Any]): Any = {
     val vc = toolManager.createContext();
     val writer = new StringWriter();
