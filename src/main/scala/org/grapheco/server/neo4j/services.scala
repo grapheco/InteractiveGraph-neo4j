@@ -37,7 +37,7 @@ class BoltService extends Logging with CypherService {
   var _url = "";
   var _user = "";
   var _pass = "";
-  var _longDriver: Driver = null;
+  var _driver:Driver = null;
   var _longSession: Session = null;
 
   def setBoltUrl(value: String) = _url = value;
@@ -47,18 +47,20 @@ class BoltService extends Logging with CypherService {
   def setBoltPassword(value: String) = _pass = value;
 
   override def execute[T](f: (Session) => T): T = {
-    val driver = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
-    val session = driver.session(AccessMode.READ);
+    if(_driver==null){
+      _driver = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
+    }
+    val session = _driver.session(AccessMode.READ);
     val result = f(session);
     session.close();
-    driver.close();
+//    driver.close();
     result;
   }
 
   override def aliveExecute[T](f: Session => T): T = {
-    if (this._longDriver == null || this._longSession == null) {
-      this._longDriver  = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
-      this._longSession = this._longDriver.session(AccessMode.READ);
+    if (this._driver == null || this._longSession == null) {
+      this._driver  = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
+      this._longSession = this._driver.session(AccessMode.READ);
     }
     f(this._longSession);
   }

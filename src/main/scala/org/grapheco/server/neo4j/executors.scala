@@ -83,6 +83,7 @@ class GetNeighbours extends JsonCommandExecutor with Neo4jCommandExecutor {
 class GetNodesInfo extends JsonCommandExecutor with Neo4jCommandExecutor {
 
   def execute(request: JsonObject): Map[String, _] = {
+
     val ids = request.getAsJsonArray("nodeIds").map(_.getAsString).reduce(_ + "," + _);
     val query = s"match (n) where id(n) in [$ids] return n";
     Map("infos" ->
