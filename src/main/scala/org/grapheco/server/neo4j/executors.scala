@@ -155,11 +155,14 @@ class Search extends JsonCommandExecutor with Neo4jCommandExecutor {
   def regexpSearch(exp: String, limit: Number): Array[_] = {
     var expr: String = exp;
     var label: String = null;
-    if(expr.contains(':')) {
+    if(expr.contains(':')&&expr.split(':').length==2) {
       label = expr.split(':')(0);
       expr = expr.split(':')(1);
-    }
-    val filter = setting()._regexpSearchFields.map(x => s"n.${x} starts with '${expr}'").reduce(_ + " and " + _);
+//      if(label.length==0||expr.length==0){return null}
+    }else{return Array.emptyIntArray}
+//    val filter = setting()._regexpSearchFields.map(x => s"n.${x} starts with '${expr}'").reduce(_ + " and " + _);
+    val prop = setting()._regexpSearchFields.getOrDefault(label, setting()._regexpSearchFields.getOrDefault("*", "name"))
+    val filter = s"n.${prop} starts with '${expr}'"
     val query = s"match (n${ if(label!=null && !label.equals("")){":"+label}}) where ${filter} return n limit ${limit}";
 
     setting()._cypherService.queryObjects(query, {
@@ -176,7 +179,20 @@ class LoadGraph extends JsonCommandExecutor with Neo4jCommandExecutor {
   final val WINDOWHEIGHT = 1200;
 
   def execute(request: JsonObject): Map[String, _] = {
-
+    val cypher = setting()._loadCypher;
+    if (cypher!=null&&cypher.length>0){
+      setting()._cypherService.execute{ session:Session=>
+        val nodes = session.run(cypher).map{ result =>
+          val n = result.get("p").asPath().nodes().iterator().next();
+          wrapNode(n);
+        }.toArray
+        val edges = session.run(cypher).map{ result =>
+          val rel = result.get("p").asPath().relationships().iterator().next();
+          wrapRelationship(rel);
+        }.toArray
+        Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> 0, "height" -> 0);
+      };
+    }else {
     if (request.get("dynamic").getAsBoolean) {
       // dynamic mode
       setting()._cypherService.aliveExecute { (session: Session) =>
@@ -189,23 +205,26 @@ class LoadGraph extends JsonCommandExecutor with Neo4jCommandExecutor {
       }
     } else {
       // Read all at once
-      setting()._cypherService.execute { (session: Session) =>
-        val nodes = queryNodes(session);
-        val edges = queryEdges(session);
-        Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> 0, "height" -> 0);
-      };
+
+
+        setting()._cypherService.execute { (session: Session) =>
+          val nodes = queryNodes(session);
+          val edges = queryEdges(session);
+          Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> 0, "height" -> 0);
+        };
+      }
     }
   }
 
   private def queryEdges(session: Session): Array[Map[String, Any]] = {
-    session.run("MATCH p=()-->() RETURN p limit 10000").map { result =>
+    session.run("MATCH p=()-->() RETURN p limit 1000").map { result =>
       val rel = result.get("p").asPath().relationships().iterator().next();
       wrapRelationship(rel);
     }.toArray
   }
 
   private def queryNodes(session: Session): Array[Map[String, Any]] = {
-    session.run("MATCH (n) RETURN n limit 10000").map { result =>
+    session.run("MATCH (n) RETURN n limit 1000").map { result =>
       val node = result.get("n").asNode();
       wrapNode(node);
     }.toArray
@@ -366,5 +385,12 @@ class StopFindRelations extends JsonCommandExecutor with Neo4jCommandExecutor {
       "queryId" -> task.taskId,
       "stopped" -> true
     );
+  }
+}
+
+class searchImage extends JsonCommandExecutor with Neo4jCommandExecutor {
+  override def execute(request: JsonObject): Map[String, _] = {
+    println(request)
+    return null
   }
 }

@@ -16,6 +16,7 @@ class Neo4jSetting extends Setting {
   var _cypherService: CypherService = _;
   var _backendType = "";
   var _categories: Map[String, String] = _;
+  var _loadCypher: String = _;
 
 
   def setBackendType(s: String) = _backendType = s;
@@ -27,10 +28,15 @@ class Neo4jSetting extends Setting {
       map(x => x(0) -> x(1)).
       toMap;
 
-  var _regexpSearchFields: Array[String] = Array();
+  var _regexpSearchFields: Map[String, String] = Map[String, String]();
   var _strictSearchFields: Map[String, String] = Map[String, String]();
 
-  def setRegexpSearchFields(s: String) = _regexpSearchFields = s.split(",");
+  def setRegexpSearchFields(s: String) = _regexpSearchFields =
+    s.split(",")
+      .filter(_.contains("."))
+      .map(_.split("\\."))
+      .map(x => x(0) -> x(1))
+      .toMap
 
   def setStrictSearchFields(s: String) = _strictSearchFields =
     s.split(",").
@@ -44,6 +50,7 @@ class Neo4jSetting extends Setting {
 
   def setGraphMetaDB(value: GraphMetaDB) = _graphMetaDB = value;
 
+  def setLoadCypher(s:String) = _loadCypher = s;
 
 
   def setLayout(value: Boolean) = {
@@ -115,7 +122,12 @@ class Neo4jGraphMetaDBInMemory extends GraphMetaDB with InitializingBean {
       (node.labels.headOption.map("group" -> _).toMap) ++
       _graphNodeProperties.filter(!_._1.startsWith("flag:")).map {
         en => {
-          (en._1 -> VelocityUtils.parse(en._2, ctx))
+          var exp = en._2.split(",")
+            .filter(s => !s.contains(":")||node.labels.toArray.contains(s.split(":")(0)))
+          if(exp.length>1) exp = exp.filter(s=>s.contains(":")).map(s=>s.split(":")(1))
+          if(en._1 == "info") exp = Array(en._2)
+          (en._1 -> VelocityUtils.parse(exp.last, ctx))
+
         }
       }.filter(_._2 != null).toMap
   }

@@ -206,5 +206,6 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-simple:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.11.8" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
+    <orderEntry type="library" name="Maven: com.liferay:org.apache.commons.fileupload:1.2.2.LIFERAY-PATCHED-1" level="project" />
   </component>
 </module>

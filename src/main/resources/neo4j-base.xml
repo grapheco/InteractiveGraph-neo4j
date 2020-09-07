@@ -11,6 +11,7 @@
         <property name="regexpSearchFields" value="${neo4j.regexpSearchFields}"/>
         <property name="strictSearchFields" value="${neo4j.strictSearchFields}"/>
         <property name="nodeCategories" value="${neo4j.nodeCategories}"/>
+        <property name="loadCypher" value="${visDataCypher}"/>
         <property name="layout" value="${layout_on_startup}" />
         <property name="graphMetaDB">
             <bean class="org.grapheco.server.neo4j.Neo4jGraphMetaDBInMemory">
