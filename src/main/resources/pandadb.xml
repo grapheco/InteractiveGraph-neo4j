@@ -6,13 +6,13 @@
     <context:annotation-config/>
     <context:component-scan base-package="org.grapheco.server"/>
 
-    <bean class="org.grapheco.server.pidb.PidbSetting">
+    <bean class="org.grapheco.server.pandadb.PidbSetting">
         <property name="backendType" value="${backendType}"/>
         <property name="regexpSearchFields" value="${pidb.regexpSearchFields}"/>
         <property name="strictSearchFields" value="${pidb.strictSearchFields}"/>
         <property name="nodeCategories" value="${pidb.nodeCategories}"/>
         <property name="graphMetaDB">
-            <bean class="org.grapheco.server.pidb.PidbGraphMetaDBInMemory">
+            <bean class="org.grapheco.server.pandadb.PidbGraphMetaDBInMemory">
                 <property name="visNodeProperties">
                     <map>
                         <entry key="label" value="${visNodeProperty.label}"/>
@@ -25,7 +25,7 @@
         </property>
         <property name="commandExecutorRegistry">
             <bean class="org.grapheco.server.DefaultCommandExecutorRegistry">
-                <property name="classNamePattern" value="org.grapheco.server.pidb._"/>
+                <property name="classNamePattern" value="org.grapheco.server.pandadb._"/>
                 <property name="extraCommands">
                     <map>
                         <!--
@@ -39,7 +39,7 @@
             </bean>
         </property>
     </bean>
-    <bean class="org.grapheco.server.pidb.PidbService">
+    <bean class="org.grapheco.server.pandadb.PidbService">
         <!--作为构造函数的参数-->
         <constructor-arg name="boltUrl" value="${pidb.boltUrl}"/>
         <constructor-arg name="boltUser" value="${pidb.boltUser}"/>
