@@ -1,22 +1,25 @@
-package org.grapheco.server.pidb
+package org.grapheco.server.pandadb
 
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
+import cn.pandadb.database.PandaDB.logger
 import com.google.gson.JsonObject
 import org.grapheco.server.{CommandExecutor, JsonCommandExecutor, Setting}
-import org.neo4j.driver.v1.types.{Node, Path, Relationship}
-import org.neo4j.driver.v1.{Record, Session, StatementResult}
+import org.neo4j.blob.impl.BlobFactory
+import org.neo4j.blob.{BlobEntry, BlobId, MimeType}
+import org.neo4j.driver.{Session, StatementResult}
+import org.neo4j.driver.types.{Node, Path, Relationship}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-trait PidbCommandExecutor extends CommandExecutor {
-  var _setting: PidbSetting = _;
+trait PandadbCommandExecutor extends CommandExecutor {
+  var _setting: PandadbSetting = _;
 
   override def initialize(setting: Setting): Unit = {
-    _setting = setting.asInstanceOf[PidbSetting];
+    _setting = setting.asInstanceOf[PandadbSetting];
   }
 
   def setting() = _setting;
@@ -43,19 +46,24 @@ trait PidbCommandExecutor extends CommandExecutor {
   }
 }
 
-class Init extends JsonCommandExecutor with PidbCommandExecutor {
+class Init extends JsonCommandExecutor with PandadbCommandExecutor {
   def execute(request: JsonObject): Map[String, _] = {
+
     Map("product" -> "neo4j",
       "backendType" -> setting()._backendType,
       "categories" -> setting()._categories
     ) ++
       setting()._graphMetaDB.getNodesCount().map("nodesCount" -> _) ++
-      setting()._graphMetaDB.getEdgesCount().map("edgesCount" -> _)
-
+      setting()._graphMetaDB.getEdgesCount().map("edgesCount" -> _) ++
+      Map("autoLayout" -> !(
+        setting()._cypherService.querySingleObject("match (n) return n limit 1", rsl=>{
+          rsl.get("n").asNode().containsKey("x")
+        })
+        ))
   }
 }
 
-class GetNeighbours extends JsonCommandExecutor with PidbCommandExecutor {
+class GetNeighbours extends JsonCommandExecutor with PandadbCommandExecutor {
 
   def execute(request: JsonObject): Map[String, _] = {
     val id = request.get("nodeId").getAsString;
@@ -65,35 +73,40 @@ class GetNeighbours extends JsonCommandExecutor with PidbCommandExecutor {
       setting()._cypherService.queryObjects(query1, {
         record =>
           wrapRelationship(record.get(0).asRelationship());
-      }).toArray,
+      }),
       "neighbourNodes" ->
         setting()._cypherService.queryObjects(query2, {
           record =>
             wrapNode(record.get(0).asNode());
-        }).toArray);
+        }));
   }
 }
 
-class GetNodesInfo extends JsonCommandExecutor with PidbCommandExecutor {
+class GetNodesInfo extends JsonCommandExecutor with PandadbCommandExecutor {
 
   def execute(request: JsonObject): Map[String, _] = {
+
     val ids = request.getAsJsonArray("nodeIds").map(_.getAsString).reduce(_ + "," + _);
     val query = s"match (n) where id(n) in [$ids] return n";
-    Map("infos" ->
+    val rsl = Map("infos" ->
       setting()._cypherService.queryObjects(query, {
         record =>
           val node = record.get(0).asNode();
-          wrapNode(node).getOrElse("info", null);
+          val a = wrapNode(node)
+          val info = a.getOrElse("info", null);
+          info.asInstanceOf[String]
       }).toArray);
+    rsl
   }
 }
 
-class FilterNodesByCategory extends JsonCommandExecutor with PidbCommandExecutor {
+//TODO dynamic
+class FilterNodesByCategory extends JsonCommandExecutor with PandadbCommandExecutor {
 
   def execute(request: JsonObject): Map[String, _] = {
     val category = request.get("catagory").getAsString;
     val ids = request.getAsJsonArray("nodeIds").map(_.getAsString).reduce(_ + "," + _);
-    val query = s"match (n:$category) where id(n) in [$ids] return n";
+    val query = s"match (n:$category) where id(n) in [$ids] return n limit 10000";
     val filteredNodeIds = setting()._cypherService.queryObjects(query, {
       record =>
         val node = record.get(0).asNode();
@@ -104,7 +117,7 @@ class FilterNodesByCategory extends JsonCommandExecutor with PidbCommandExecutor
   }
 }
 
-class Search extends JsonCommandExecutor with PidbCommandExecutor {
+class Search extends JsonCommandExecutor with PandadbCommandExecutor {
 
   def execute(request: JsonObject): Map[String, _] = {
     val jexpr = request.get("expr");
@@ -138,15 +151,24 @@ class Search extends JsonCommandExecutor with PidbCommandExecutor {
         record =>
           val node = record.get(0).asNode();
           wrapNode(node);
-      }).toArray
+      })
     }.reduce { (x, y) =>
       x ++ y
-    };
+    }.toArray;
   }
 
-  def regexpSearch(expr: String, limit: Number): Array[_] = {
-    val filter = setting()._regexpSearchFields.map(x => s"n.${x} =~ '${expr}.*'").reduce(_ + " and " + _);
-    val query = s"match (n) where ${filter} return n limit ${limit}";
+  def regexpSearch(exp: String, limit: Number): Array[_] = {
+    var expr: String = exp;
+    var label: String = null;
+    if(expr.contains(':')&&expr.split(':').length==2) {
+      label = expr.split(':')(0);
+      expr = expr.split(':')(1);
+      //      if(label.length==0||expr.length==0){return null}
+    }else{return Array.emptyIntArray}
+    //    val filter = setting()._regexpSearchFields.map(x => s"n.${x} starts with '${expr}'").reduce(_ + " and " + _);
+    val prop = setting()._regexpSearchFields.getOrDefault(label, setting()._regexpSearchFields.getOrDefault("*", "name"))
+    val filter = s"n.${prop} starts with '${expr}'"
+    val query = s"match (n${ if(label!=null && !label.equals("")){":"+label}}) where ${filter} return n limit ${limit}";
 
     setting()._cypherService.queryObjects(query, {
       record =>
@@ -156,29 +178,134 @@ class Search extends JsonCommandExecutor with PidbCommandExecutor {
   }
 }
 
-class LoadGraph extends JsonCommandExecutor with PidbCommandExecutor {
+class LoadGraph extends JsonCommandExecutor with PandadbCommandExecutor {
+
+  final val WINDOWWIDTH = 2000;
+  final val WINDOWHEIGHT = 1200;
 
   def execute(request: JsonObject): Map[String, _] = {
-    setting()._cypherService.execute { (session: Session) =>
-      val nodes = queryNodes(session);
-      val edges = queryEdges(session);
-      Map[String, Any]("nodes" -> nodes, "edges" -> edges);
-    };
+    val cypher = setting()._loadCypher;
+    if (cypher!=null&&cypher.length>0){
+      setting()._cypherService.execute{ session:Session=>
+        val nodes = session.run(cypher).map{ result =>
+          val n = result.get("p").asPath().nodes().iterator().next();
+          wrapNode(n);
+        }.toArray
+        val edges = session.run(cypher).map{ result =>
+          val rel = result.get("p").asPath().relationships().iterator().next();
+          wrapRelationship(rel);
+        }.toArray
+        Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> 0, "height" -> 0);
+      };
+    }else {
+      if (request.get("dynamic").getAsBoolean) {
+        // dynamic mode
+        setting()._cypherService.execute { (session: Session) =>
+          val scale = if(request.has("scale"))
+            request.get("scale").getAsDouble
+          else 1
+          val nodes = queryBatchNodes(session, request);
+          val edges = queryBatchEdges(session, request);
+          Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> (2 * this.WINDOWWIDTH/scale).toInt, "height" -> (2 * this.WINDOWHEIGHT/scale).toInt);
+        }
+      } else {
+        // Read all at once
+
+        setting()._cypherService.execute { (session: Session) =>
+          val nodes = queryNodes(session);
+          val edges = queryEdges(session);
+          Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> 0, "height" -> 0);
+        };
+      }
+    }
+
   }
 
   private def queryEdges(session: Session): Array[Map[String, Any]] = {
-    session.run("MATCH p=(n)-->() RETURN p").map { result =>
-      val rel = result.get("p").asPath().relationships().iterator().next();
+    val tx = session.beginTransaction()
+    val query = "MATCH p=()-->() RETURN relationships(p) as r limit 5000"
+    logger.info(query)
+    val arr = tx.run(query).map { result =>
+      val rel = result.get("r").get(0).asRelationship()
       wrapRelationship(rel);
     }.toArray
+    tx.success()
+    tx.close()
+    arr
   }
 
-  private def queryNodes(session: Session): Array[Map[String, _]] = {
-    session.run("MATCH (n) RETURN n").map { result =>
+  private def queryNodes(session: Session): Array[Map[String, Any]] = {
+    val tx = session.beginTransaction()
+    val query = "MATCH (n) RETURN n limit 5000"
+    logger.info(query)
+    val arr = tx.run(query).map { result =>
       val node = result.get("n").asNode();
       wrapNode(node);
     }.toArray
+    tx.success()
+    tx.close()
+    arr
   }
+
+  private def queryBatchNodes(session: Session, request: JsonObject): Array[Map[String, Any]] = {
+
+    val scale = if(request.has("scale"))
+      request.get("scale").getAsDouble
+    else 1
+
+    val t = ( if(request.has("centerPointY"))
+      request.get("centerPointY").getAsDouble.toInt
+    else 0 ) + (this.WINDOWHEIGHT/scale).toInt
+
+    val b = ( if(request.has("centerPointY"))
+      request.get("centerPointY").getAsDouble.toInt
+    else 0 ) - (this.WINDOWHEIGHT/scale).toInt
+
+    val l = ( if(request.has("centerPointX"))
+      request.get("centerPointX").getAsDouble.toInt
+    else 0 ) - (this.WINDOWWIDTH/scale).toInt
+
+    val r = ( if(request.has("centerPointX"))
+      request.get("centerPointX").getAsDouble.toInt
+    else 0 ) + (this.WINDOWWIDTH/scale).toInt
+
+    session.run(
+      s"MATCH (n) WHERE n.x > $l AND n.x < $r AND n.y > $b AND n.y < $t RETURN n LIMIT 1000")
+      .map { result =>
+        val node = result.get("n").asNode();
+        wrapNode(node);
+      }.toArray
+  }
+
+  private def queryBatchEdges(session: Session, request: JsonObject): Array[Map[String, _]] = {
+    val scale = if(request.has("scale"))
+      request.get("scale").getAsDouble
+    else 1
+
+    val t = ( if(request.has("centerPointY"))
+      request.get("centerPointY").getAsDouble.toInt
+    else 0 ) + (this.WINDOWHEIGHT/scale).toInt
+
+    val b = ( if(request.has("centerPointY"))
+      request.get("centerPointY").getAsDouble.toInt
+    else 0 ) - (this.WINDOWHEIGHT/scale).toInt
+
+    val l = ( if(request.has("centerPointX"))
+      request.get("centerPointX").getAsDouble.toInt
+    else 0 ) - (this.WINDOWWIDTH/scale).toInt
+
+    val r = ( if(request.has("centerPointX"))
+      request.get("centerPointX").getAsDouble.toInt
+    else 0 ) + (this.WINDOWWIDTH/scale).toInt
+
+    session.run(
+      s"MATCH (n)-[r]-() WHERE n.x > $l AND n.x < $r AND n.y > $b AND n.y < $t RETURN r LIMIT 1000")
+      .map { result =>
+        val rel = result.get("r").asRelationship();
+        wrapRelationship(rel);
+      }.toArray
+  }
+
 }
 
 object FindRelationsTaskManager {
@@ -186,7 +313,7 @@ object FindRelationsTaskManager {
   val allTasks = mutable.Map[String, FindRelationsTask]();
 
 
-  class FindRelationsTask(executor: PidbCommandExecutor, query: String) {
+  class FindRelationsTask(executor: PandadbCommandExecutor, query: String) {
     var _isCompleted = false;
     val lock = new CountDownLatch(1);
     val taskId = seq.incrementAndGet();
@@ -229,20 +356,20 @@ object FindRelationsTaskManager {
     }
   }
 
-  def createTask(executor: PidbCommandExecutor, query: String): FindRelationsTask = {
+  def createTask(executor: PandadbCommandExecutor, query: String): FindRelationsTask = {
     new FindRelationsTask(executor, query);
   }
 
   def getTask(taskId: String) = allTasks(taskId);
 }
 
-class FindRelations extends JsonCommandExecutor with PidbCommandExecutor {
+class FindRelations extends JsonCommandExecutor with PandadbCommandExecutor {
   def execute(request: JsonObject): Map[String, _] = {
     val startNodeId = request.get("startNodeId").getAsString;
     val endNodeId = request.get("endNodeId").getAsString;
     val maxDepth = request.get("maxDepth").getAsNumber;
 
-    val query = s"start m=node($startNodeId), n=node($endNodeId) match p=(m)-[*1..$maxDepth]-(n) RETURN p";
+    val query = s"match p=(m)-[*1..$maxDepth]-(n) where id(m)=${startNodeId} and id(n) = ${endNodeId} RETURN p";
     val task = FindRelationsTaskManager.createTask(this, query);
     Thread.sleep(1);
     task.waitForExecution();
@@ -251,7 +378,7 @@ class FindRelations extends JsonCommandExecutor with PidbCommandExecutor {
   }
 }
 
-class GetMoreRelations extends JsonCommandExecutor with PidbCommandExecutor {
+class GetMoreRelations extends JsonCommandExecutor with PandadbCommandExecutor {
   def execute(request: JsonObject): Map[String, _] = {
     val queryId = request.get("queryId").getAsString;
 
@@ -264,7 +391,7 @@ class GetMoreRelations extends JsonCommandExecutor with PidbCommandExecutor {
   }
 }
 
-class StopFindRelations extends JsonCommandExecutor with PidbCommandExecutor {
+class StopFindRelations extends JsonCommandExecutor with PandadbCommandExecutor {
   def execute(request: JsonObject): Map[String, _] = {
     val queryId = request.get("queryId").getAsString;
 
@@ -275,5 +402,25 @@ class StopFindRelations extends JsonCommandExecutor with PidbCommandExecutor {
       "queryId" -> task.taskId,
       "stopped" -> true
     );
+  }
+}
+
+class SearchImage extends JsonCommandExecutor with PandadbCommandExecutor {
+  override def execute(request: JsonObject): Map[String, _] = {
+    val image = BlobFactory.fromURL(request.get("file").getAsString)
+//    val image = s"<${request.get("file").getAsString}>"
+    val query = s"match (n) where n.image is not null and  n.image <: {IMAGE} return n"
+    logger.info(s"$query");
+    val nodes = setting()._cypherService.queryObjects(query, Map("IMAGE"->image),{
+      record =>
+        val node = record.get(0).asNode();
+        wrapNode(node);
+    }).toArray
+//    val nodes = setting()._cypherService.queryObjects(query.replaceFirst("\\{IMAGE\\}",image),{
+//      record =>
+//        val node = record.get(0).asNode();
+//        wrapNode(node);
+//    }).toArray
+    Map("nodes" -> nodes);
   }
 }

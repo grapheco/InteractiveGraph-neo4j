@@ -1,15 +1,14 @@
-package org.grapheco.server.pidb
+package org.grapheco.server.pandadb
 
 import java.io.{File, FileInputStream}
 
+import cn.pandadb.connector.BoltService
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.grapheco.server.util.{JsonUtils, Logging, ServletContextUtils}
-import org.neo4j.driver.v1._
-import org.neo4j.graphdb.factory.{GraphDatabaseFactory, GraphDatabaseSettings}
-import org.neo4j.graphdb.{GraphDatabaseService, Label, RelationshipType}
+import org.neo4j.driver.{Session, StatementResult}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
-import cn.pidb.engine.{BoltService, CypherService, PidbConnector}
+import cn.pandadb.database.PandaDB.logger
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -19,19 +18,23 @@ import scala.reflect.ClassTag
   * Created by huchuan on 2019/4/10.
   */
 
-class PidbService(boltUrl:String, boltUser:String, boltPassword:String) extends BoltService(boltUrl, boltUser, boltPassword){
+//
+class PandaDBDatabaseService(url: String, user: String = "", pass: String = "") extends BoltService(url, user, pass) with InitializingBean with DisposableBean {
+
+  override def executeQuery[T](queryString: String, fn: StatementResult => T): T = {
+    val logger = cn.pandadb.database.PandaDB.logger
+    if (!queryString.contains("<http")){
+      logger.info(queryString)
+    }
+    super.executeQuery(queryString, fn)
+  }
 
 
-  def getRelativeOrAbsoluteFile(path: String) = {
-    Some(new File(path)).map { file =>
-      if (file.isAbsolute) {
-        file
-      }
-      else {
-        new File(ServletContextUtils.getServletContext.getRealPath(s"/${path}"))
-      }
-    }.get
+  def afterPropertiesSet(): Unit = {
+
+  }
+
+  override def destroy(): Unit = {
+
   }
 }
-
-

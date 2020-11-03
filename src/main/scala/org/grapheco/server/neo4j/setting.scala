@@ -4,12 +4,15 @@ import java.util.{Map => JMap}
 
 import org.grapheco.server.Setting
 import org.grapheco.server.util.{Edge, Layout, VelocityUtils}
-import org.neo4j.driver.v1.types.Node
+import org.neo4j.driver.types.Node
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 
 import scala.collection.JavaConversions._
 import org.grapheco.server.util.Graph
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation._
+import org.springframework.stereotype.Component
 
 class Neo4jSetting extends Setting {
   @Autowired
@@ -17,6 +20,7 @@ class Neo4jSetting extends Setting {
   var _backendType = "";
   var _categories: Map[String, String] = _;
   var _loadCypher: String = _;
+  var _autoLayout: Boolean = _;
 
 
   def setBackendType(s: String) = _backendType = s;
@@ -54,6 +58,7 @@ class Neo4jSetting extends Setting {
 
 
   def setLayout(value: Boolean) = {
+    _autoLayout = value
     if (value) {
       Layout.layout(new org.grapheco.server.util.Graph(
         _cypherService.queryObjects("match (n) return id(n),labels(n)",

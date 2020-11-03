@@ -6,13 +6,13 @@
     <context:annotation-config/>
     <context:component-scan base-package="org.grapheco.server"/>
 
-    <bean class="org.grapheco.server.pandadb.PidbSetting">
+    <bean class="org.grapheco.server.pandadb.PandadbSetting">
         <property name="backendType" value="${backendType}"/>
-        <property name="regexpSearchFields" value="${pidb.regexpSearchFields}"/>
-        <property name="strictSearchFields" value="${pidb.strictSearchFields}"/>
-        <property name="nodeCategories" value="${pidb.nodeCategories}"/>
+        <property name="regexpSearchFields" value="${pandadb.regexpSearchFields}"/>
+        <property name="strictSearchFields" value="${pandadb.strictSearchFields}"/>
+        <property name="nodeCategories" value="${pandadb.nodeCategories}"/>
         <property name="graphMetaDB">
-            <bean class="org.grapheco.server.pandadb.PidbGraphMetaDBInMemory">
+            <bean class="org.grapheco.server.pandadb.PandadbGraphMetaDBInMemory">
                 <property name="visNodeProperties">
                     <map>
                         <entry key="label" value="${visNodeProperty.label}"/>
@@ -39,10 +39,10 @@
             </bean>
         </property>
     </bean>
-    <bean class="org.grapheco.server.pandadb.PidbService">
+    <bean class="org.grapheco.server.pandadb.PandaDBDatabaseService">
         <!--作为构造函数的参数-->
-        <constructor-arg name="boltUrl" value="${pidb.boltUrl}"/>
-        <constructor-arg name="boltUser" value="${pidb.boltUser}"/>
-        <constructor-arg name="boltPassword" value="${pidb.boltPassword}"/>
+        <constructor-arg name="url" value="${pandadb.boltUrl}"/>
+        <constructor-arg name="user" value="${pandadb.boltUser}"/>
+        <constructor-arg name="pass" value="${pandadb.boltPassword}"/>
     </bean>
 </beans>

@@ -22,7 +22,7 @@
           <file>file://$MODULE_DIR$/src/main/resources/neo4j-bolt.xml</file>
           <file>file://$MODULE_DIR$/src/main/resources/neo4j-db.xml</file>
           <file>file://$MODULE_DIR$/src/main/resources/neo4j-gson.xml</file>
-          <file>file://$MODULE_DIR$/src/main/resources/pidb.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/pandadb.xml</file>
         </fileset>
       </configuration>
     </facet>
@@ -59,12 +59,15 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="scala-sdk-2.11.12" level="application" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:4.0.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:4.0.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-beans:4.0.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-core:4.0.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:4.0.0.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-autoconfigure:2.3.3.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.3.3.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.apache.velocity:velocity:1.7" level="project" />
     <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.4" level="project" />
@@ -83,7 +86,6 @@
     <orderEntry type="library" name="Maven: org.apache.struts:struts-tiles:1.3.8" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="library" name="Maven: org.neo4j.driver:neo4j-java-driver:1.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.neo4j:neo4j:3.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-kernel:3.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-graphdb-api:3.4.0" level="project" />
@@ -147,7 +149,7 @@
     <orderEntry type="module-library">
       <library name="Maven: jdk.tools:jdk.tools:1.6">
         <CLASSES>
-          <root url="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/lib/tools.jar!/" />
+          <root url="jar://C:/Program Files/Java/jdk1.8.0_202/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -184,6 +186,10 @@
     <orderEntry type="library" name="Maven: io.netty:netty-all:4.1.24.Final" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.13" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.7" level="project" />
+    <orderEntry type="library" name="Maven: org.neo4j.driver:neo4j-java-driver:2.0.1-graiph-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.grapheco:graiph-blob-impl:0.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.grapheco:graiph-blob-api:0.1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-csv:3.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-primitive-collections:3.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.neo4j:neo4j-unsafe:3.4.0" level="project" />
@@ -196,9 +202,9 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.neo4j:neo4j-io:test-jar:tests:3.4.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.sun.jersey:jersey-client:1.19.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.neo4j.app:neo4j-server:test-jar:tests:3.4.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: commons-codec:commons-codec:1.11" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.apache.httpcomponents:httpclient:4.5.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.apache.httpcomponents:httpcore:4.4.5" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.11" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.5" level="project" />
     <orderEntry type="library" name="Maven: eu.medsea.mimeutil:mime-util:2.1.3" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.5.6" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.slf4j:slf4j-log4j12:1.5.6" level="project" />
@@ -207,5 +213,21 @@
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.11.8" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
     <orderEntry type="library" name="Maven: com.liferay:org.apache.commons.fileupload:1.2.2.LIFERAY-PATCHED-1" level="project" />
+    <orderEntry type="library" name="Maven: pandadb:database:0.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: pandadb:semop-api:0.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.reflections:reflections:0.9.10" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:15.0" level="project" />
+    <orderEntry type="library" name="Maven: org.javassist:javassist:3.19.0-GA" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.findbugs:annotations:2.0.1" level="project" />
+    <orderEntry type="library" name="Maven: pandadb:semop-lib:0.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: info.debatty:java-string-similarity:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-parser-combinators_2.11:1.1.1" level="project" />
+    <orderEntry type="library" name="Maven: pandadb:server:0.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: pandadb:connector:0.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="scala-sdk-2.11.12 (2)" level="application" />
+    <orderEntry type="library" name="scala-sdk-2.11.12 (3)" level="application" />
+    <orderEntry type="library" name="scala-sdk-2.11.8" level="application" />
   </component>
 </module>

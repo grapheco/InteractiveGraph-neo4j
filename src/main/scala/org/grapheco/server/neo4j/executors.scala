@@ -5,9 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.google.gson.JsonObject
 import org.grapheco.server.{CommandExecutor, JsonCommandExecutor, Setting}
-
-import org.neo4j.driver.v1.types.{Node, Path, Relationship}
-import org.neo4j.driver.v1.{Session, StatementResult}
+import org.neo4j.driver.types.{Node,Path,Relationship}
+import org.neo4j.driver.{Session, StatementResult}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -138,7 +137,10 @@ class Search extends JsonCommandExecutor with Neo4jCommandExecutor {
       filter.entrySet().map { en =>
         val key = getNodePropertyName(en.getKey);
         val value = en.getValue.getAsString;
-        s"n.$key='$value'"
+        if (key.equals("<id>"))
+          s"id(n)=$value"
+        else
+          s"n.$key='$value'"
       }.reduce(_ + " and " + _);
     }.map { filter =>
       val query = s"match (n) where ${filter} return n limit ${limit}";
@@ -388,7 +390,7 @@ class StopFindRelations extends JsonCommandExecutor with Neo4jCommandExecutor {
   }
 }
 
-class searchImage extends JsonCommandExecutor with Neo4jCommandExecutor {
+class SearchImage extends JsonCommandExecutor with Neo4jCommandExecutor {
   override def execute(request: JsonObject): Map[String, _] = {
     println(request)
     return null

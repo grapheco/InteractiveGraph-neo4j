@@ -14,7 +14,7 @@ import org.grapheco.server.util.{JsonUtils, Logging, ServletContextUtils}
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
 import org.springframework.context.support.FileSystemXmlApplicationContext
 import scala.collection.JavaConverters._
-
+import java.util.{Calendar, Date}
 import scala.collection.{JavaConversions, mutable}
 
 /**
@@ -147,9 +147,10 @@ class ConnectorServlet extends HttpServlet with Logging {
   }
 
   def saveFile(request:HttpServletRequest): JsonObject ={
+    val FILE_DIR = "/upload"
     val res = new JsonObject
     try {
-      val realPath = ServletContextUtils.getServletContext.getRealPath("/upload");//  /WEB-INF/files
+      val realPath = ServletContextUtils.getServletContext.getRealPath(FILE_DIR);//  /WEB-INF/files
       //判断存放上传文件的目录是否存在（不存在则创建）
       val f = new File(realPath);
       if(!f.exists() && !f.isDirectory()){
@@ -190,7 +191,8 @@ class ConnectorServlet extends HttpServlet with Logging {
 //          System.out.println("普通字段:"+filedName+"=="+filedValue);
         }else{
           //如果fileitem中封装的是上传文件，得到上传的文件名称，
-          val fileName = "123"
+          val fileName = generateRandomFilename()+"."+item.getName.split("\\.")(1)
+
           //多个文件上传输入框有空 的 异常处理
           if(fileName!=null && !("".equals(fileName.trim()))) { //去空格是否为空
             //拼接上传路径。存放路径+上传的文件名
@@ -204,19 +206,37 @@ class ConnectorServlet extends HttpServlet with Logging {
             //判断输入流中的数据是否已经读完的标识
             var len = -1;
             //循环将输入流读入到缓冲区当中，(len=in.read(buffer))！=-1就表示in里面还有数据
-            while ((len = in.read(b)) != -1) { //没数据了返回-1
+            len = in.read(b)
+            while (len != -1) { //没数据了返回-1
               //使用FileOutputStream输出流将缓冲区的数据写入到指定的目录(savePath+"\\"+filename)当中
               out.write(b, 0, len);
+              len = in.read(b)
             }
             //关闭流
             out.close();
             in.close();
             //删除临时文件
             item.delete(); //删除处理文件上传时生成的临时文件
-            System.out.println("文件上传成功");
+            import java.net.InetAddress
+//            var ia:InetAddress  = null
+//            try {
+//              ia = InetAddress .getLocalHost
+//              val localname = ia.getHostName
+//              val localip = ia.getHostAddress
+//              System.out.println("本机名称是：" + localname)
+//              System.out.println("本机的ip是 ：" + localip)
+//            } catch {
+//              case e: Exception =>
+//                e.printStackTrace()
+//            }
+            val ip = InetAddress.getLocalHost.getHostAddress
+            val dir = "/graphserver"
+            res.addProperty("file",
+              request.getScheme() + "://" + ip + ":" +request.getServerPort() + dir +FILE_DIR+"/"+fileName)
           }
         }
       })
+      return res
     }
     catch {
       case e: FileUploadException=>
@@ -224,7 +244,16 @@ class ConnectorServlet extends HttpServlet with Logging {
     }
     return res
   }
+
+
+  def generateRandomFilename():String={
+    val random = scala.util.Random.nextInt(99)+101
+    val calCurrent = Calendar.getInstance ();
+    calCurrent.getTimeInMillis.toString+random.toString
+  }
+
 }
+
 
 
 class UnknownBackendTypeException(typeName: String) extends

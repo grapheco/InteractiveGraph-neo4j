@@ -8,7 +8,8 @@ import org.grapheco.server.util.{Edge, Graph, JsonUtils, Layout, Node}
 
 object LayoutTest {
   def main(args: Array[String]): Unit = {
-
+    println("测试中文显示")
+    return 0
     val data = JsonUtils.parse(
       FileUtils.readFileToString(new File("/Users/huchuan/Documents/InteractiveGraph-neo4j/src/test/test.json"), "UTF-8")).getAsJsonObject.get("data").getAsJsonObject
     val node = data.get("nodes").getAsJsonArray

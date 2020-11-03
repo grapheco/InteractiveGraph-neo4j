@@ -13,7 +13,7 @@
             <artifactId>maven-war-plugin</artifactId>
             <version>2.6</version>
             <configuration>
-                <webXml>web\WEB-INF\web.xml</webXml>
+                <webXml>${basedir}\web\WEB-INF\web.xml</webXml>
             </configuration>
           </plugin>
       </plugins>
@@ -22,6 +22,7 @@
     <version>0.0.1</version>
     <properties>
         <neo4j.version>3.4.0</neo4j.version>
+        <pandadb.version>0.1.0-SNAPSHOT</pandadb.version>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-io -->
@@ -36,6 +37,13 @@
             <artifactId>spring-context</artifactId>
             <version>4.0.0.RELEASE</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>2.3.3.RELEASE</version>
+        </dependency>
+
         <!-- velocity -->
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -59,12 +67,7 @@
             <artifactId>gson</artifactId>
             <version>2.8.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.neo4j.driver/neo4j-java-driver -->
-        <dependency>
-            <groupId>org.neo4j.driver</groupId>
-            <artifactId>neo4j-java-driver</artifactId>
-            <version>1.7.2</version>
-        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j -->
         <dependency>
@@ -87,7 +90,7 @@
         <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
-            <version>1.6.0</version>
+            <version>2.0.1-graiph-SNAPSHOT</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j-csv -->
         <dependency>
@@ -146,7 +149,32 @@
             <artifactId>org.apache.commons.fileupload</artifactId>
             <version>1.2.2.LIFERAY-PATCHED-1</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>database</artifactId>
+            <version>${pandadb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>semop-lib</artifactId>
+            <version>${pandadb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>server</artifactId>
+            <version>${pandadb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>connector</artifactId>
+            <version>${pandadb.version}</version>
+        </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>sdc</id>
+            <name>Repository</name>
+            <url>http://10.0.82.220:8081/repository/maven-public/</url>
+        </repository>
+    </repositories>
 </project>

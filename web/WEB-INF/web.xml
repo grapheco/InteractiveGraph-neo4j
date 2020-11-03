@@ -51,7 +51,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>connector4</servlet-name>
-        <url-pattern>/connector-pidb</url-pattern>
+        <url-pattern>/connector-pandadb</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

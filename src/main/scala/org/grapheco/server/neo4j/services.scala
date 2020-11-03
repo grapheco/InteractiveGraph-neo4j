@@ -4,7 +4,7 @@ import java.io.{File, FileInputStream}
 
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.grapheco.server.util.{JsonUtils, Logging, ServletContextUtils}
-import org.neo4j.driver.v1._
+import org.neo4j.driver._
 import org.neo4j.graphdb.factory.{GraphDatabaseFactory, GraphDatabaseSettings}
 import org.neo4j.graphdb.{GraphDatabaseService, Label, RelationshipType}
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,7 +50,8 @@ class BoltService extends Logging with CypherService {
     if(_driver==null){
       _driver = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
     }
-    val session = _driver.session(AccessMode.READ);
+    val session = _driver.session()
+//    val session = _driver.session(AccessMode.READ);
     val result = f(session);
     session.close();
 //    driver.close();
@@ -60,7 +61,8 @@ class BoltService extends Logging with CypherService {
   override def aliveExecute[T](f: Session => T): T = {
     if (this._driver == null || this._longSession == null) {
       this._driver  = GraphDatabase.driver(_url, AuthTokens.basic(_user, _pass));
-      this._longSession = this._driver.session(AccessMode.READ);
+      this._longSession = this._driver.session();
+//      this._longSession = this._driver.session(AccessMode.READ);
     }
     f(this._longSession);
   }

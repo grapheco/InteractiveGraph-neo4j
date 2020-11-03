@@ -3,16 +3,19 @@ package org.grapheco.server.util
 import java.io.{File, FileOutputStream, StringWriter}
 import java.util.Properties
 
-import cn.pidb.blob.Blob
-import cn.pidb.engine.blob.{BlobIO, InlineBlob, RemoteBlob}
 import org.apache.velocity.app.VelocityEngine
 import org.apache.velocity.tools.ToolManager
 import org.apache.velocity.tools.config.DefaultKey
-import org.neo4j.values.storable.{BlobValue, ValueWriter}
 import org.springframework.util.ClassUtils
+
 import scala.collection.JavaConversions
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.InetAddress
+
+import org.apache.commons.io.IOUtils
+import org.neo4j.blob.{Blob, ManagedBlob}
+import org.neo4j.driver.internal.value.{InlineBlob, RemoteBlob}
 
 /**
   * Created by bluejoe on 2018/2/13.
@@ -29,7 +32,19 @@ object VelocityUtils {
   props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem")
   props.put("runtime.log.logsystem.log4j.category", "velocity")
   props.put("runtime.log.logsystem.log4j.logger", "velocity")
+  props.put("runtime.log.debug.stacktrace", "false")
+  props.put("runtime.log.invalid.references", "false")
   ve.init(props)
+
+  val PATH = ClassUtils.getDefaultClassLoader
+    .getResource("")
+    .getPath
+    .replace("/WEB-INF/classes","") + "static/"
+  //TODO port!!!!
+//  val WEBPATH = s"http://${InetAddress.getLocalHost.getHostAddress}:9999/graphserver/static/"
+  val WEBPATH = s"/graphserver/static/"
+  val fileSystemTool = new FileSystemTool()
+
   def parse(expr: String, context: Map[String, Any]): Any = {
     val vc = toolManager.createContext();
     val writer = new StringWriter();
@@ -47,25 +62,38 @@ object VelocityUtils {
       if (expr.startsWith("=")) {
         val expr1 = expr.substring(1);
         ve.evaluate(vc, writer, "", s"#set($$__VAR=$expr1)");
-        var value = vc.get("__VAR");
-        //if is a blob
-        if(value.isInstanceOf[Blob]){
-          //get blob
-          var result:String = ""
-          try {
-            val data = value.asInstanceOf[Blob].toBytes()
-            val path = ClassUtils.getDefaultClassLoader.getResource("").getPath.replace("/WEB-INF/classes","") + "static/"
-            val tool = new FileSystemTool()
-            result = tool.filesave(data,path, System.currentTimeMillis.toString+".jpg")
+        val value = vc.get("__VAR");
+        value match {
+          case value: InlineBlob => {
+            val key = value.id.asLiteralString()
+            // TODO jpg?
+            val filename = key+".jpg"
+            if (!fileSystemTool.exists(PATH + filename)){
+              fileSystemTool.filesave(value.toBytes(),PATH,filename)
+            }
+            WEBPATH + filename
           }
-          catch{
-            case e:Throwable =>
-              print(e.toString)
+//          case value: ManagedBlob => {
+//            val key = value.id.asLiteralString()
+//            val filename = key+".jpg"
+//            if (!fileSystemTool.exists(PATH + filename)){
+//              fileSystemTool.filesave(value.toBytes(),PATH,filename)
+//            }
+//            WEBPATH + filename
+//          }
+          case value: RemoteBlob => {
+            val key = value.id.asLiteralString()
+            val filename = key+".jpg"
+            if (!fileSystemTool.exists(PATH + filename)){
+              val b = value.toBytes()
+              fileSystemTool.filesave(b,PATH,filename)
+            }
+            WEBPATH + filename
           }
-          //TODO url
-          return "http://localhost:9999/graphserver/static/"+result
+          case _ => {
+            value
+          }
         }
-        return value
       }
       else {
         ve.evaluate(vc, writer, "", expr);
@@ -86,8 +114,6 @@ class WrongExpressionException(msg: String, e: Throwable) extends RuntimeExcepti
 @DefaultKey("fileTool")
 class FileSystemTool {
   def exists(path: String) = new File(path).exists();
-
-
 
   @throws[IOException]
   def filesave(file: Array[Byte], filePath: String, fileName: String): String = { //目标目录
