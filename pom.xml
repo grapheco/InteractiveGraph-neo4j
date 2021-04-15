@@ -149,32 +149,6 @@
             <artifactId>org.apache.commons.fileupload</artifactId>
             <version>1.2.2.LIFERAY-PATCHED-1</version>
         </dependency>
-        <dependency>
-            <groupId>pandadb</groupId>
-            <artifactId>database</artifactId>
-            <version>${pandadb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>pandadb</groupId>
-            <artifactId>semop-lib</artifactId>
-            <version>${pandadb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>pandadb</groupId>
-            <artifactId>server</artifactId>
-            <version>${pandadb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>pandadb</groupId>
-            <artifactId>connector</artifactId>
-            <version>${pandadb.version}</version>
-        </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>sdc</id>
-            <name>Repository</name>
-            <url>http://10.0.82.220:8081/repository/maven-public/</url>
-        </repository>
-    </repositories>
+
 </project>
