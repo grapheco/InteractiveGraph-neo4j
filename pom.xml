@@ -8,15 +8,39 @@
     <name>interactivegraph-server</name>
     <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-war-plugin</artifactId>
-            <version>2.6</version>
-            <configuration>
-                <webXml>${basedir}\web\WEB-INF\web.xml</webXml>
-            </configuration>
-          </plugin>
-      </plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>${basedir}\web</directory>
+                            <targetPath>/</targetPath>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
+                    <webXml>${basedir}\web\WEB-INF\web.xml</webXml>
+                </configuration>
+            </plugin>
+        </plugins>
+        <sourceDirectory>${basedir}\src\main\scala</sourceDirectory>
+        <testSourceDirectory>${basedir}\src\test\scala</testSourceDirectory>
+        <outputDirectory>${basedir}\target\classes</outputDirectory>
+        <testOutputDirectory>${basedir}\target\test-classes</testOutputDirectory>
+        <resources>
+            <resource>
+                <directory>${basedir}\src\main\resources</directory>
+                <includes>
+                    <include>*.*</include>
+                </includes>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>${basedir}\src\test\resources</directory>
+            </testResource>
+        </testResources>
     </build>
     <packaging>war</packaging>
     <version>0.0.1</version>
