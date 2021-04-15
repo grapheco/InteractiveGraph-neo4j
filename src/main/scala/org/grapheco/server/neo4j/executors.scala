@@ -4,8 +4,10 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.google.gson.JsonObject
+import org.apache.hadoop.hbase.TableName
+import org.grapheco.server.hbase.{HBaseService, TileLoader}
 import org.grapheco.server.{CommandExecutor, JsonCommandExecutor, Setting}
-import org.neo4j.driver.types.{Node,Path,Relationship}
+import org.neo4j.driver.types.{Node, Path, Relationship}
 import org.neo4j.driver.{Session, StatementResult}
 
 import scala.collection.JavaConversions._
@@ -185,9 +187,8 @@ class LoadGraph extends JsonCommandExecutor with Neo4jCommandExecutor {
     if (cypher!=null&&cypher.length>0){
       setting()._cypherService.execute{ session:Session=>
         val nodes = session.run(cypher).map{ result =>
-          val n = result.get("p").asPath().nodes().iterator().next();
-          wrapNode(n);
-        }.toArray
+          result.get("p").asPath().nodes().iterator().toArray
+        }.flatMap(node=>node).map(wrapNode(_)).toArray
         val edges = session.run(cypher).map{ result =>
           val rel = result.get("p").asPath().relationships().iterator().next();
           wrapRelationship(rel);
@@ -293,10 +294,49 @@ class LoadGraph extends JsonCommandExecutor with Neo4jCommandExecutor {
 
 }
 
+class LoadTiles extends JsonCommandExecutor with Neo4jCommandExecutor{
+
+  def execute(request: JsonObject): Map[String, _] = {
+    val level = if(request.has("level"))
+                    request.get("level").getAsByte
+                  else 0
+    val row = if(request.has("row"))
+      request.get("row").getAsInt
+    else 0
+    val column = if(request.has("column"))
+      request.get("column").getAsInt
+    else 0
+
+    val tile = TileLoader.loadTileFromRedis(level, column, row)
+    val nodesInTile = tile.filter(_._2._3>0).toMap[Long,(Int,Int,Int)]
+
+
+    val nodeids = nodesInTile.keys.toList
+
+    val query = s"match (n) where id(n) in [${nodeids.mkString(",")}] return n";
+    val nodes = setting()._cypherService.queryObjects(query, {
+      record =>
+        val node = record.get(0).asNode();
+        val id = node.id()
+        wrapNode(node)++Map[String,Int]("x"->nodesInTile.get(id).get._1, "y"->nodesInTile.get(id).get._2, "weight"->nodesInTile.get(id).get._3)
+    })
+
+    val edges = tile.filter(_._2._3<0).map(TileLoader.node2edge(_)).map{
+      t=> Map[String, Any]("from" -> t._1, "to" -> t._2, "value" -> t._3);
+    }.toArray
+//    val edges = setting()._cypherService.queryObjects(query2, {
+//      result =>
+//        val rel = result.get("r").asRelationship();
+//        wrapRelationship(rel);
+//    })
+    Map[String, Any]("nodes" -> nodes, "edges" -> edges, "width" -> 191791, "height" -> 191791);
+  }
+
+}
+
 object FindRelationsTaskManager {
   val seq = new AtomicInteger(1224);
   val allTasks = mutable.Map[String, FindRelationsTask]();
-
 
   class FindRelationsTask(executor: Neo4jCommandExecutor, query: String) {
     var _isCompleted = false;
@@ -315,7 +355,6 @@ object FindRelationsTaskManager {
               val path = executor.wrapPath(record.get(0).asPath());
               paths.append(path);
             }
-
             _isCompleted = true;
         });
       }

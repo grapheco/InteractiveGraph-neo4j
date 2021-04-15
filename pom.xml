@@ -23,6 +23,7 @@
     <properties>
         <neo4j.version>3.4.0</neo4j.version>
         <pandadb.version>0.1.0-SNAPSHOT</pandadb.version>
+        <hbase.version>2.3.2</hbase.version>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-io -->
@@ -169,12 +170,35 @@
             <artifactId>connector</artifactId>
             <version>${pandadb.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-common</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/net.debasishg/redisclient -->
+        <dependency>
+            <groupId>net.debasishg</groupId>
+            <artifactId>redisclient_2.11</artifactId>
+            <version>3.30</version>
+        </dependency>
     </dependencies>
     <repositories>
-        <repository>
-            <id>sdc</id>
-            <name>Repository</name>
-            <url>http://10.0.82.220:8081/repository/maven-public/</url>
-        </repository>
+<!--        <repository>-->
+<!--            <id>sdc</id>-->
+<!--            <name>Repository</name>-->
+<!--            <url>http://10.0.82.220:8081/repository/maven-public/</url>-->
+<!--        </repository>-->
     </repositories>
 </project>
