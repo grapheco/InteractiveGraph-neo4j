@@ -45,7 +45,7 @@
     <packaging>war</packaging>
     <version>0.0.1</version>
     <properties>
-        <neo4j.version>3.4.0</neo4j.version>
+        <neo4j.version>3.5.0</neo4j.version>
         <pandadb.version>0.1.0-SNAPSHOT</pandadb.version>
     </properties>
     <dependencies>
